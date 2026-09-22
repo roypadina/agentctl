@@ -1,6 +1,6 @@
 {
   "name": "agentctl",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "One menu to start new Claude/Codex sessions in a project, or search + resume existing ones",
   "type": "module",
   "license": "MIT",
