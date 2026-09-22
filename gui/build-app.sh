@@ -12,6 +12,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/AgentctlBar"
 cp Info.plist "$APP/Contents/Info.plist"
+cp AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 # Single source of truth for the app version: package.json, stamped in at build time so the
 # bundle can never report a stale literal (it sat at 0.2.1 through two releases).
 VERSION=$(node -p "require('../../package.json').version")
