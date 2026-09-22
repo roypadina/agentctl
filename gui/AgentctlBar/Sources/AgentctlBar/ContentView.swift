@@ -119,10 +119,14 @@ struct ContentView: View {
     }
     private var newFlat: [Dir] { newSections.flatMap { $0.dirs } }
     private var resumeItems: [Session] {
-        Fuzzy.rank(query, sessions.filter { inSessionView($0) && passesDoneFilter($0) && passesKindFilter($0) }) {
-            "\($0.name)  \(tilde($0.cwd))  \($0.id)  "
-                + $0.tags.map { "#" + $0 }.joined(separator: " ") + "  "
-                + $0.tickets.joined(separator: " ") + "  " + ($0.note ?? "")
+        // Split out of one expression: the chained + over interpolations blew the
+        // type-checker's budget on CI's Swift ("unable to type-check in reasonable time").
+        let visible = sessions.filter { inSessionView($0) && passesDoneFilter($0) && passesKindFilter($0) }
+        return Fuzzy.rank(query, visible) { s -> String in
+            let tags: String = s.tags.map { "#" + $0 }.joined(separator: " ")
+            let tickets: String = s.tickets.joined(separator: " ")
+            let note: String = s.note ?? ""
+            return "\(s.name)  \(tilde(s.cwd))  \(s.id)  \(tags)  \(tickets)  \(note)"
         }
     }
     private var count: Int { tab == .new ? newFlat.count : resumeItems.count }
