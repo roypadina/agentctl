@@ -75,8 +75,14 @@ export function sessionStartContext(raw: string, deps: HookDeps = {}): string {
 
   const dueElsewhere = [...readAll().values()].filter(x => x.sessionId !== id && isReminderDue(x, now));
   if (dueElsewhere.length > 0) {
-    const names = dueElsewhere.slice(0, 3).map(x => x.name ?? x.sessionId.slice(0, 8)).join(', ');
-    lines.push(`${dueElsewhere.length} other session(s) have a reminder due (${names}). Mention this once.`);
+    lines.push(
+      `${dueElsewhere.length} other session(s) have a reminder due. Mention each once, with its session and` +
+      ' resume command:',
+    );
+    for (const x of dueElsewhere.slice(0, 3)) {
+      const short = x.sessionId.slice(0, 8);
+      lines.push(`- "${x.name ?? short}" (session ${short}) — resume: \`agentctl resume ${short}\``);
+    }
   }
 
   lines.push(
