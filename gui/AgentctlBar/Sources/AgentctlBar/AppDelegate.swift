@@ -77,14 +77,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.menu = nil // restore left-click → popover after this menu closes
     }
 
-    @objc private func showAbout() {
-        let credits = NSMutableAttributedString(
-            string: "Made by Roy Padina\n\nI'm a software engineer from Israel who builds small, focused Mac tools to fix the little annoyances in my own day — then shares them free and open source.\n\nIf this app saves you time, a coffee on Ko-fi keeps the next one coming. ☕\n\n",
-            attributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.labelColor])
-        credits.append(NSAttributedString(string: "Support on Ko-fi", attributes: [.link: AppLinks.kofi, .font: NSFont.systemFont(ofSize: 11)]))
-        NSApp.activate(ignoringOtherApps: true)
-        NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
-    }
+    @objc private func showAbout() { AboutWindow.shared.show() }
 
     @objc private func openKofi() { NSWorkspace.shared.open(AppLinks.kofi) }
 

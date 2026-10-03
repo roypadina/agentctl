@@ -149,19 +149,15 @@ struct SettingsView: View {
             Divider()
             sectionTitle("About")
             HStack(spacing: 12) {
-                Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 48, height: 48)
+                Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 40, height: 40)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Agentctl").font(.headline)
                     Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")")
                         .font(.caption).foregroundColor(.secondary)
                 }
-            }
-            Text("Made by Roy Padina").bold()
-            Text("I'm a software engineer from Israel who builds small, focused Mac tools to fix the little annoyances in my own day — then shares them free and open source.")
-            Text("If this app saves you time, a coffee on Ko-fi keeps the next one coming. ☕")
-            HStack {
+                Spacer()
+                Button("About Agentctl…") { AboutWindow.shared.show() }
                 Button("Support on Ko-fi ☕") { NSWorkspace.shared.open(AppLinks.kofi) }.buttonStyle(.borderedProminent)
-                Button("GitHub") { NSWorkspace.shared.open(AppLinks.github) }
             }
         }
     }
