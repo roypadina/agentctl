@@ -12,7 +12,7 @@ done
 
 # ── shared config (New groups + tools) ──
 cat > "$BASE/config.toml" <<TOML
-default_tool = "cld"
+default_tool = "claude"
 
 [[group]]
 name  = "Projects"
@@ -20,7 +20,7 @@ path  = "$BASE/code"
 color = "#6C91BF"
 
 [[tool]]
-name  = "cld"
+name  = "claude"
 runs  = "claude --dangerously-skip-permissions"
 label = " ⚡ Projects "
 color = "#6C91BF"

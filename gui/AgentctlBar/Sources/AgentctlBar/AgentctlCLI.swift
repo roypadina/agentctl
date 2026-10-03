@@ -128,22 +128,20 @@ extension Notification.Name {
     static let cmActionFailed = Notification.Name("cmActionFailed")   // a fire-and-forget launch/resume failed (object = message)
 }
 
-enum CmError: Error { case notFound, failed(String) }
+enum AgentctlCLIError: Error { case notFound, failed(String) }
 
 /// Thin client over the `agentctl gui ...` CLI. All real work (config, launching) lives in Node.
-enum Cm {
-    /// Resolve a runnable agentctl. $ACM_BIN overrides; else probe fixed install paths
-    /// for `agentctl` (then the `agentctl` alias).
+enum AgentctlCLI {
+    /// Resolve a runnable agentctl. $AGENTCTL_BIN overrides; else probe fixed install paths
+    /// for `agentctl`.
     static func invocation() -> String? {
-        if let o = ProcessInfo.processInfo.environment["ACM_BIN"], !o.isEmpty { return o }
+        if let o = ProcessInfo.processInfo.environment["AGENTCTL_BIN"], !o.isEmpty { return o }
         let home = NSHomeDirectory()
         let dirs = ["/Applications/Agentctl.app/Contents/Resources/cli/bin",
                     "/opt/homebrew/bin", "/usr/local/bin", "\(home)/.local/bin"]
-        for name in ["agentctl", "agentctl"] {
-            for d in dirs {
-                let c = "\(d)/\(name)"
-                if FileManager.default.isExecutableFile(atPath: c) { return "'\(c)'" }
-            }
+        for d in dirs {
+            let c = "\(d)/agentctl"
+            if FileManager.default.isExecutableFile(atPath: c) { return "'\(c)'" }
         }
         return nil
     }
@@ -176,7 +174,7 @@ enum Cm {
     }
 
     private static func run(_ args: String) throws -> Data {
-        guard let cm = invocation() else { throw CmError.notFound }
+        guard let agentctl = invocation() else { throw AgentctlCLIError.notFound }
         let p = Process()
         p.environment = childEnvironment()
         p.executableURL = URL(fileURLWithPath: "/bin/sh")
@@ -184,7 +182,7 @@ enum Cm {
         // it echoes lands in front of the JSON and breaks the decode. `invocation()` already
         // resolved an absolute path, so nothing here needs the profile's PATH. Same call CLAUDE.md
         // makes for the CLI side.
-        p.arguments = ["-c", "\(cm) gui \(args)"]
+        p.arguments = ["-c", "\(agentctl) gui \(args)"]
         let out = Pipe(); let err = Pipe()
         p.standardOutput = out; p.standardError = err
         // Drain stderr concurrently. Reading stdout to EOF before reaping the child deadlocks the
@@ -206,7 +204,7 @@ enum Cm {
             // The reason is on stdout, not stderr: `agentctl gui` prints {ok:false,error:"…"} and
             // exits non-zero. Reading only stderr turned "unrecognised time: next tuesday" into
             // "exit 4" — the most reachable failure in the app, explained away.
-            throw CmError.failed(reason(stdout: data, stderr: errText, status: p.terminationStatus))
+            throw AgentctlCLIError.failed(reason(stdout: data, stderr: errText, status: p.terminationStatus))
         }
         return data
     }
@@ -245,8 +243,8 @@ enum Cm {
     private static func postFailure(_ error: Error) {
         let msg: String
         switch error {
-        case CmError.notFound: msg = "agentctl not found. Install it: brew install --cask roypadina/tap/agentctl"
-        case CmError.failed(let m): msg = m.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "the action failed." : m
+        case AgentctlCLIError.notFound: msg = "agentctl not found. Install it: brew install --cask roypadina/tap/agentctl"
+        case AgentctlCLIError.failed(let m): msg = m.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "the action failed." : m
         default: msg = "\(error)"
         }
         DispatchQueue.main.async { NotificationCenter.default.post(name: .cmActionFailed, object: msg) }
@@ -334,11 +332,11 @@ enum Cm {
         }
         DispatchQueue.global().async {
             let failure: String?
-            if let cm = invocation() {
+            if let agentctl = invocation() {
                 let p = Process()
                 p.environment = childEnvironment()
                 p.executableURL = URL(fileURLWithPath: "/bin/sh")
-                p.arguments = ["-c", "\(cm) gui config-save"]
+                p.arguments = ["-c", "\(agentctl) gui config-save"]
                 let inp = Pipe(); let out = Pipe(); let err = Pipe()
                 p.standardInput = inp; p.standardOutput = out; p.standardError = err
                 do {
@@ -374,7 +372,7 @@ enum Cm {
             do {
                 let data = try run("new-dir --base '\(esc(base))' --name '\(esc(name))'")
                 guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let path = obj["path"] as? String else { postFailure(CmError.failed("couldn’t create the directory")); return }
+                      let path = obj["path"] as? String else { postFailure(AgentctlCLIError.failed("couldn’t create the directory")); return }
                 _ = try run("launch --dir '\(esc(path))' --tool '\(esc(tool))'")
             } catch { postFailure(error) }
         }

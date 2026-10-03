@@ -129,7 +129,7 @@ export function validateConfig(
   }
 
   // default tool
-  let defaultTool = asString(raw.default_tool) ?? 'cld';
+  let defaultTool = asString(raw.default_tool) ?? 'claude';
   if (tools.length > 0 && !tools.some(t => t.name === defaultTool)) {
     warnings.push({ code: 'unknown-default-tool', message: `default_tool "${defaultTool}" not configured → using "${tools[0].name}"` });
     defaultTool = tools[0].name;

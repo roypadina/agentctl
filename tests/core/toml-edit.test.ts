@@ -5,7 +5,7 @@ import { parse } from 'smol-toml';
 describe('upsertKeyInSection', () => {
   it('replaces an existing key in the section, preserving comments + other keys', () => {
     const src = `# header comment
-default_tool = "cld"
+default_tool = "claude"
 
 [gui]
 terminal = "Terminal"
@@ -15,7 +15,7 @@ terminal = "Terminal"
     expect(out).toContain('terminal = "iTerm"');
     expect(out).not.toContain('terminal = "Terminal"');
     expect(out).toContain('# header comment');
-    expect(out).toContain('default_tool = "cld"');
+    expect(out).toContain('default_tool = "claude"');
     expect((parse(out) as any).gui.terminal).toBe('iTerm');
   });
 
@@ -27,7 +27,7 @@ terminal = "Terminal"
   });
 
   it('appends a new section when absent', () => {
-    const src = `default_tool = "cld"\n`;
+    const src = `default_tool = "claude"\n`;
     const out = upsertKeyInSection(src, 'gui', 'terminal', 'Ghostty');
     expect((parse(out) as any).gui.terminal).toBe('Ghostty');
   });

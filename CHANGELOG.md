@@ -3,6 +3,21 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [Unreleased]
+
+### Changed — BREAKING
+
+- **The GUI's binary-override env var is now `$AGENTCTL_BIN`** (the previous name is no longer
+  read). The Swift CLI client type is now `AgentctlCLI`.
+- **Default launcher tool renamed** to `claude`. Existing configs that name their own tools are
+  unaffected; only the built-in default and the `default_tool` fallback change.
+
+### Removed — BREAKING
+
+- **Legacy config migration and fallbacks.** The one-time move of the previous config directory,
+  and every fallback to the previous environment variable names (config path, home, Claude binary,
+  recap model), are gone. Only `AGENTCTL_*` variables and `~/.config/agentctl` are read.
+
 ## [0.7.0] — 2026-08-29
 
 ### Fixed
@@ -78,18 +93,12 @@ All notable changes to Agentctl are documented here. Format loosely follows
 
 ### Changed — BREAKING
 
-- **Renamed to `agentctl`.** One name everywhere, replacing the five the project used to ship
-  (`Agent CLI Menu` / `AgentCliMenu` / `agentclimenu` / `agent-cli-menu` / `acm`). The command is
-  now **`agentctl`**; `acm` and `agent-cli-menu` are gone — `acm` reads as AWS Certificate Manager
-  to this audience, which was half the reason to rename. The cask is `roypadina/tap/agentctl`, the
-  app is `Agentctl.app` (`com.roypadina.agentctl` — the old bundle id used a domain we don't own),
-  and config lives in `~/.config/agentctl`.
-- **Nothing is lost upgrading.** A pre-rename `~/.config/agentclimenu` is moved across on first
-  run — config, annotations and recaps all live under it, so one rename carries every one of them —
-  and each renamed env var still falls back to its old name (`AGENTCTL_CONFIG` → `AGENTCLIMENU_CONFIG`,
-  `AGENTCTL_HOME` → `CCSM_HOME`, and so on). Shell aliases or Raycast/tmux binds pointing at `acm`
-  do need updating, and the new bundle id means the global hotkey, Login Item and Accessibility
-  grants have to be given to the app once more.
+- **Renamed to `agentctl`.** One name everywhere, replacing the several the project used to ship.
+  The command is now **`agentctl`**; the previous command names are gone. The cask is
+  `roypadina/tap/agentctl`, the app is `Agentctl.app` (`com.roypadina.agentctl` — the previous
+  bundle id used a domain we don't own), and config lives in `~/.config/agentctl`. Shell aliases or
+  Raycast/tmux binds pointing at the previous command need updating, and the new bundle id means the
+  global hotkey, Login Item and Accessibility grants have to be given to the app once more.
 
 ### Added
 
@@ -187,16 +196,16 @@ All notable changes to Agentctl are documented here. Format loosely follows
 - **App bundle renamed to `Agentctl.app`** (+ `CFBundleName` = "Agentctl") so Spotlight,
   Raycast, and Finder show the spaced display name instead of "Agentctl". `brew upgrade --cask
   agentctl` swaps the bundle. Identifiers (`agentctl` token, repo, `com.roypadina.agentctl`,
-  `agentctl`/`agentctl` binaries) are unchanged.
+  the `agentctl` binary) are unchanged.
 
 ## [0.2.0] — 2026-06-05
 
 ### Changed (breaking)
 
-- **Commands renamed.** The three separate commands `cm` / `cld` / `ccsm` are replaced by a single
-  **`agentctl`** (short alias **`agentctl`**). It opens **New** by default; **`-r`** / **`--resume`**
-  opens **Resume**. Want `cld`/`cdx`-style per-tool shortcuts? Add your own shell aliases. After
-  `brew upgrade --cask agentctl`, the old `cm`/`cld`/`ccsm` symlinks are removed.
+- **Commands renamed.** The three separate commands are replaced by a single **`agentctl`**. It
+  opens **New** by default; **`-r`** / **`--resume`** opens **Resume**. Want `claude`/`cdx`-style
+  per-tool shortcuts? Add your own shell aliases. After `brew upgrade --cask agentctl`, the previous
+  command symlinks are removed.
 - **Display name** is now "Agentctl" (spaces) in the app, menu bar, and docs. The cask token
   (`agentctl`), repo, and bundle id are unchanged.
 
@@ -210,24 +219,24 @@ All notable changes to Agentctl are documented here. Format loosely follows
 
 ## [0.1.0] — 2026-06-05
 
-First public release. Agentctl merges two tools — the `cld` project launcher and the
-`ccsm` session manager — into one, with a native macOS GUI.
+First public release. Agentctl merges two tools — a project launcher and a
+session manager — into one, with a native macOS GUI.
 
 ### Added
 
-- **New-session launcher** (`cld` / the New tab): grouped project directories, frecency sort
+- **New-session launcher** (the New tab): grouped project directories, frecency sort
   (`z`, falls back to mtime), fuzzy filter, per-row git branch, and one-key open-in-IDE / tmux /
   `git pull` / Finder / new-directory.
-- **Resume** (`ccsm` / the Resume tab): fuzzy-search every Claude Code session by name, path, or
+- **Resume** (the Resume tab): fuzzy-search every Claude Code session by name, path, or
   id; full-text search across transcripts; an inline transcript **peek** (side-by-side on wide
   terminals); and a cwd-confidence gate that warns before resuming into an uncertain directory.
-- **Unified TUI**: `cm` opens the menu (New ⇄ Resume via `⇥`, tool cycle via `⇧⇥`), with a `?`
+- **Unified TUI**: `agentctl` opens the menu (New ⇄ Resume via `⇥`, tool cycle via `⇧⇥`), with a `?`
   help overlay and a windowed viewport for long lists.
 - **Native macOS GUI** (`gui/`): a SwiftUI menu-bar + window app — keyboard-driven picker
   (custom search field with arrow/enter/esc/tab handling), full-row selection, transcript preview
   pane, in-app config editor with color pickers, a configurable terminal, and a global hotkey.
 - **Shared TOML config** at `~/.config/agentctl/config.toml`, edited by hand or in the GUI.
-- Homebrew cask (`roypadina/tap/agentctl`) bundling the GUI app and the `cm`/`cld`/`ccsm` CLI.
+- Homebrew cask (`roypadina/tap/agentctl`) bundling the GUI app and the CLI.
 
 [0.3.0]: https://github.com/roypadina/Agentctl/releases/tag/v0.3.0
 [0.2.1]: https://github.com/roypadina/Agentctl/releases/tag/v0.2.1

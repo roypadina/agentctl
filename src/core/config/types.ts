@@ -11,7 +11,7 @@ export interface GroupConfig {
 }
 
 export interface ToolConfig {
-  /** Generates a launcher command of this name (cld, cdx, …). */
+  /** Generates a launcher command of this name (claude, cdx, …). */
   name: string;
   /** Shell command line run in the chosen dir (e.g. "claude --dangerously-skip-permissions"). */
   runs: string;

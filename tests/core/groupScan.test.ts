@@ -9,7 +9,7 @@ let base: string;
 const group = (path: string, name = 'G', color = '#6C91BF'): GroupConfig => ({ name, path, pathRaw: path, color });
 
 beforeEach(() => {
-  base = mkdtempSync(join(tmpdir(), 'cm-scan-'));
+  base = mkdtempSync(join(tmpdir(), 'agentctl-scan-'));
   for (const d of ['alpha', 'beta', 'gamma']) mkdirSync(join(base, d));
   mkdirSync(join(base, 'alpha', 'nested')); // one-level guard (mutates alpha mtime — set times AFTER)
   // distinct mtimes: gamma newest, alpha oldest
@@ -71,7 +71,7 @@ describe('listProjects', () => {
   it('preserves group order and uses zDataPath', async () => {
     const z = join(base, '.z');
     writeFileSync(z, `${join(base, 'alpha')}|9|1800000000\n`);
-    const g2 = mkdtempSync(join(tmpdir(), 'cm-scan2-'));
+    const g2 = mkdtempSync(join(tmpdir(), 'agentctl-scan2-'));
     mkdirSync(join(g2, 'solo'));
     try {
       const out = await listProjects([group(base, 'First'), group(g2, 'Second')], { zDataPath: z });

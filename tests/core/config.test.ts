@@ -13,7 +13,7 @@ function cfg(contents: string): string {
 }
 function hashStr(s: string): number { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return h; }
 
-beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'cm-cfg-')); clearConfigCache(); });
+beforeEach(() => { dir = mkdtempSync(join(tmpdir(), 'agentctl-cfg-')); clearConfigCache(); });
 afterEach(() => { rmSync(dir, { recursive: true, force: true }); });
 
 describe('loadConfig', () => {
@@ -21,7 +21,7 @@ describe('loadConfig', () => {
     const r = loadConfig({ path: join(dir, 'nope.toml') });
     expect(r.source).toBe('default');
     expect(r.config.groups).toEqual([]);
-    expect(r.config.tools.map(t => t.name)).toEqual(['cld', 'cdx']);
+    expect(r.config.tools.map(t => t.name)).toEqual(['claude', 'cdx']);
     expect(r.warnings).toEqual([]);
   });
 
@@ -36,7 +36,7 @@ name = "Env"
 path = "$HOME/env"
 color = "#A855F7"
 [[tool]]
-name = "cld"
+name = "claude"
 runs = "claude --x"
 label = " c "
 color = "#6C91BF"
@@ -50,7 +50,7 @@ cmd = 'code "$dir"'
     expect(config.groups[0].color).toBe('#6C91BF'); // uppercased
     expect(config.groups[1].path).toBe(join(homedir(), 'env'));
     expect(config.ides).toHaveLength(1);
-    expect(config.tools.find(t => t.name === 'cld')?.runs).toBe('claude --x');
+    expect(config.tools.find(t => t.name === 'claude')?.runs).toBe('claude --x');
   });
 
   it('drops a reserved ide key with a warning (never throws)', () => {
@@ -127,7 +127,7 @@ describe('getTool', () => {
     const p = cfg(`[[tool]]\nname="foo"\nruns="foo --go"\n`);
     const { config } = loadConfig({ path: p });
     expect(getTool(config, 'foo').runs).toBe('foo --go');
-    expect(getTool(config, 'cld').runs).toBe('claude --dangerously-skip-permissions');
+    expect(getTool(config, 'claude').runs).toBe('claude --dangerously-skip-permissions');
     expect(getTool(config, 'bar').runs).toBe('bar'); // synthesized
   });
 });

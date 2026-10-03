@@ -39,9 +39,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func refreshHotkey() {
         // AppDelegate is @MainActor, so this Task inherits main-actor isolation:
-        // the await suspends (Cm.configGet shells out off-main internally) and register runs on main.
+        // the await suspends (AgentctlCLI.configGet shells out off-main internally) and register runs on main.
         Task { [weak self] in
-            let spec = (try? await Cm.configGet())?.hotkey
+            let spec = (try? await AgentctlCLI.configGet())?.hotkey
             self?.hotKey.register(spec)
         }
     }

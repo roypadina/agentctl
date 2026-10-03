@@ -164,7 +164,7 @@ First run sets up a starter config: `agentctl config --setup`.
 ## The terminal menu
 
 `agentctl` opens the menu — **New** by default, `⇥` to **Resume** (or jump straight there with `-r`).
-Want `cld`/`cdx`-style per-tool shortcuts? Add your own shell aliases.
+Want `claude`/`cdx`-style per-tool shortcuts? Add your own shell aliases.
 
 | Command | Opens |
 |---|---|
@@ -334,7 +334,7 @@ $AGENTCTL_CONFIG  →  $XDG_CONFIG_HOME/agentctl/config.toml  →  ~/.config/age
 See [`config.example.toml`](config.example.toml) for every option. The shape:
 
 ```toml
-default_tool = "cld"
+default_tool = "claude"
 
 [[group]]                       # a section in the New screen; `path` is scanned one level deep
 name  = "Work"
@@ -342,7 +342,7 @@ path  = "~/code/work"
 color = "#6C91BF"
 
 [[tool]]                        # an agent launcher: `runs` is executed in the chosen dir
-name  = "cld"
+name  = "claude"
 runs  = "claude --dangerously-skip-permissions"
 
 [[ide]]                         # an fzf-style ^key that opens an editor, then the tool
@@ -379,7 +379,7 @@ names by walking the filesystem — and flagged when the result isn't certain.
   project folders you configure, and launches your terminal. That's it.
 - **`--dangerously-skip-permissions`.** The default tool commands include Claude's
   `--dangerously-skip-permissions` (and Codex's sandbox-bypass) flag, because this is a launcher for your
-  own machine — it's how `cld` always worked. You can change `runs` in your config to drop it.
+  own machine. You can change `runs` in your config to drop it.
 - **Ad-hoc signed, _not_ notarized.** macOS can't verify the developer, so the first launch of the GUI is
   blocked until you **right-click → Open** (or clear quarantine — see [Install](#install)). Notarization
   needs a paid Apple Developer ID; it's on the roadmap. Prefer not to trust a prebuilt binary? Build from source.

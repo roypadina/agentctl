@@ -1,46 +1,21 @@
 import { homedir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { existsSync, renameSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import type { ConfigWarning } from './types.js';
 
 /**
  * Config path resolution chain:
  *   $AGENTCTL_CONFIG  →  $XDG_CONFIG_HOME/agentctl/config.toml  →  ~/.config/agentctl/config.toml
- * Clean break from cld: $CLD_CONFIG is intentionally NOT honored (it points at the old
- * ~/.config/cld layout whose lax yq-parsed TOML can fail smol-toml's strict parse).
  */
 export function configDir(): string {
   const xdg = process.env.XDG_CONFIG_HOME;
   const base = xdg && xdg.trim() ? xdg : join(homedir(), '.config');
-  const dir = join(base, 'agentctl');
-  migrateLegacyDir(base, dir);
-  return dir;
-}
-
-let migrationChecked = false;
-
-/**
- * One-time move of `<base>/agentclimenu` → `<base>/agentctl` for the 0.5.0 rename. config.toml,
- * annotations/ and recaps/ all live under this one dir, so a single rename carries every one of
- * them. Idempotent, and a failure is not fatal — we just carry on with the new (empty) dir.
- */
-function migrateLegacyDir(base: string, dir: string): void {
-  if (migrationChecked) return;
-  migrationChecked = true;
-  if (existsSync(dir)) return;
-  const legacy = join(base, 'agentclimenu');
-  if (!existsSync(legacy)) return;
-  try {
-    renameSync(legacy, dir);
-  } catch {
-    // a stale legacy dir is better than a crash on every command
-  }
+  return join(base, 'agentctl');
 }
 
 export function configPath(): string {
-  // AGENTCLIMENU_CONFIG is the pre-0.5.0 name, honored so an existing shell rc keeps working.
-  const explicit = process.env.AGENTCTL_CONFIG ?? process.env.AGENTCLIMENU_CONFIG;
+  const explicit = process.env.AGENTCTL_CONFIG;
   if (explicit && explicit.trim()) return explicit;
   return join(configDir(), 'config.toml');
 }

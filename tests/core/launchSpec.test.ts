@@ -5,7 +5,7 @@ import {
 } from '../../src/core/launchSpec.js';
 import type { GroupConfig, ToolConfig, IdeConfig } from '../../src/core/config/types.js';
 
-const tool: ToolConfig = { name: 'cld', runs: 'claude --x', label: ' c ', color: '#6C91BF' };
+const tool: ToolConfig = { name: 'claude', runs: 'claude --x', label: ' c ', color: '#6C91BF' };
 const ide: IdeConfig = { key: 'ctrl-v', label: 'code', cmd: 'code "$dir"' };
 const groups: GroupConfig[] = [
   { name: 'FE', path: '/code/fe', pathRaw: '~/code/fe', color: '#1' },
@@ -48,7 +48,7 @@ describe('planLaunch', () => {
   it('ctrl-t outside tmux → attached new-session', () => {
     const p = planLaunch(req({ key: 'ctrl-t', insideTmux: false }));
     expect(p.kind).toBe('tmux-attached');
-    expect(p.steps[0].command).toBe('tmux new-session -A -s cld-app -c "$dir" claude --x');
+    expect(p.steps[0].command).toBe('tmux new-session -A -s claude-app -c "$dir" claude --x');
     expect(p.steps[0].stdio).toBe('inherit');
   });
 
@@ -56,8 +56,8 @@ describe('planLaunch', () => {
     const p = planLaunch(req({ key: 'ctrl-t', insideTmux: true }));
     expect(p.kind).toBe('tmux-background');
     expect(p.steps.map(s => s.command)).toEqual([
-      'tmux new-session -d -s cld-app -c "$dir" claude --x',
-      'tmux switch-client -t cld-app',
+      'tmux new-session -d -s claude-app -c "$dir" claude --x',
+      'tmux switch-client -t claude-app',
     ]);
   });
 });
@@ -103,6 +103,6 @@ describe('defaultNewDirChoice', () => {
 
 describe('sanitizeTmuxName', () => {
   it('replaces non-word chars', () => {
-    expect(sanitizeTmuxName('cld', '/a/b/My Proj.v2')).toBe('cld-My_Proj_v2');
+    expect(sanitizeTmuxName('claude', '/a/b/My Proj.v2')).toBe('claude-My_Proj_v2');
   });
 });

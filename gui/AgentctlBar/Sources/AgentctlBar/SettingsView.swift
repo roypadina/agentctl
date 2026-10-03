@@ -29,7 +29,7 @@ struct SettingsView: View {
     @State private var groups: [EGroup] = []
     @State private var tools: [ETool] = []
     @State private var ides: [EIde] = []
-    @State private var defaultTool = "cld"
+    @State private var defaultTool = "claude"
     @State private var terminal = "default"
     @State private var custom = ""
     @State private var hotkey = ""
@@ -126,7 +126,7 @@ struct SettingsView: View {
                     removeButton { tools.removeAll { $0.id == t.id } }
                 }
             }
-            if tools.isEmpty { hint("No tools — e.g. name \"cld\", runs \"claude --dangerously-skip-permissions\".") }
+            if tools.isEmpty { hint("No tools — e.g. name \"claude\", runs \"claude --dangerously-skip-permissions\".") }
         }
     }
 
@@ -188,8 +188,8 @@ struct SettingsView: View {
     private func load() async {
         guard !loaded else { return }
         loaded = true
-        if let r = try? await Cm.terminals() { terminalOpts = r.terminals }
-        if let c = try? await Cm.configGet() {
+        if let r = try? await AgentctlCLI.terminals() { terminalOpts = r.terminals }
+        if let c = try? await AgentctlCLI.configGet() {
             groups = c.groups.map { EGroup(name: $0.name, path: $0.path, color: $0.color) }
             tools = c.tools.map { ETool(name: $0.name, runs: $0.runs, label: $0.label, color: $0.color) }
             ides = c.ides.map { EIde(key: $0.key, label: $0.label, cmd: $0.cmd) }
@@ -212,7 +212,7 @@ struct SettingsView: View {
         // redisplay the old config, losing every edit with no signal.
         saving = true
         saveError = nil
-        Cm.configSave(dto, completion: {
+        AgentctlCLI.configSave(dto, completion: {
             saving = false
             onSaved()
             NotificationCenter.default.post(name: .cmReload, object: nil)

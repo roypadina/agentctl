@@ -25,12 +25,12 @@ describe('paths', () => {
 describe('multi-profile discovery', () => {
   let home: string;
   let origHome: string | undefined;
-  let origCcsm: string | undefined;
+  let origAgentctlHome: string | undefined;
 
   beforeEach(() => {
     home = mkdtempSync(join(tmpdir(), 'agentctl-homes-'));
     origHome = process.env.HOME;
-    origCcsm = process.env.AGENTCTL_HOME;
+    origAgentctlHome = process.env.AGENTCTL_HOME;
     process.env.HOME = home;
     delete process.env.AGENTCTL_HOME;
     // primary + a side profile that shares `projects/` by symlink but has its own `sessions/`
@@ -44,7 +44,7 @@ describe('multi-profile discovery', () => {
   afterEach(() => {
     rmSync(home, { recursive: true, force: true });
     if (origHome === undefined) delete process.env.HOME; else process.env.HOME = origHome;
-    if (origCcsm === undefined) delete process.env.AGENTCTL_HOME; else process.env.AGENTCTL_HOME = origCcsm;
+    if (origAgentctlHome === undefined) delete process.env.AGENTCTL_HOME; else process.env.AGENTCTL_HOME = origAgentctlHome;
   });
 
   it('finds side profiles and keeps the primary first', () => {

@@ -3,7 +3,7 @@ import { executePlan, type LaunchDeps } from '../../src/cli/launch.js';
 import { planLaunch, planNewDir } from '../../src/core/launchSpec.js';
 import type { ToolConfig, IdeConfig } from '../../src/core/config/types.js';
 
-const tool: ToolConfig = { name: 'cld', runs: 'claude --x', label: '', color: '#6C91BF' };
+const tool: ToolConfig = { name: 'claude', runs: 'claude --x', label: '', color: '#6C91BF' };
 const ide: IdeConfig = { key: 'ctrl-v', label: 'code', cmd: 'code "$dir"' };
 
 interface Call { cmd: string; args: string[]; opts: { cwd?: string; stdio?: string; detached?: boolean }; async?: boolean }

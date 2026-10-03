@@ -327,7 +327,7 @@ struct ContentView: View {
 
     private func dirRow(_ d: Dir, index: Int) -> some View {
         let sel = index == selIndex
-        return Button { selection = index; Cm.launch(dir: d.path, tool: selectedTool); onAction() } label: {
+        return Button { selection = index; AgentctlCLI.launch(dir: d.path, tool: selectedTool); onAction() } label: {
             HStack {
                 Text(d.name).fontWeight(sel ? .semibold : .regular)
                 if let b = d.branch { Text("⎇ \(b)").font(.caption2).foregroundColor(Tone.branch) }
@@ -387,26 +387,26 @@ struct ContentView: View {
             TextField("name this session", text: $annName)
                 .textFieldStyle(.roundedBorder).font(.caption2)
                 .focused($annFocus, equals: .name)
-                .onSubmit { Cm.annotate(id: s.id, name: annName) { applyAnnotation(s.id, $0) } }
+                .onSubmit { AgentctlCLI.annotate(id: s.id, name: annName) { applyAnnotation(s.id, $0) } }
             TextField("labels — ticket, repo, topic (RD-12345, catalog)", text: $annLabels)
                 .textFieldStyle(.roundedBorder).font(.caption2)
                 .focused($annFocus, equals: .labels)
                 .onSubmit {
                     let list = annLabels.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                    Cm.annotate(id: s.id, labels: list.filter { !$0.isEmpty }) { applyAnnotation(s.id, $0) }
+                    AgentctlCLI.annotate(id: s.id, labels: list.filter { !$0.isEmpty }) { applyAnnotation(s.id, $0) }
                 }
             TextField("flags, comma separated (todo, later…)", text: $annFlags)
                 .textFieldStyle(.roundedBorder).font(.caption2)
                 .focused($annFocus, equals: .flags)
                 .onSubmit {
                     let list = annFlags.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                    Cm.annotate(id: s.id, flags: list.filter { !$0.isEmpty }) { applyAnnotation(s.id, $0) }
+                    AgentctlCLI.annotate(id: s.id, flags: list.filter { !$0.isEmpty }) { applyAnnotation(s.id, $0) }
                 }
             // single-line: TextField(text:axis:) and lineLimit(range) are macOS 13+, this app targets 12
             TextField("note", text: $annNote)
                 .textFieldStyle(.roundedBorder).font(.caption2)
                 .focused($annFocus, equals: .note)
-                .onSubmit { Cm.annotate(id: s.id, note: annNote) { applyAnnotation(s.id, $0) } }
+                .onSubmit { AgentctlCLI.annotate(id: s.id, note: annNote) { applyAnnotation(s.id, $0) } }
             }
         }
     }
@@ -450,7 +450,7 @@ struct ContentView: View {
     private func doneToggle(_ s: Session) -> some View {
         Toggle("Done", isOn: Binding(
             get: { s.isDone },
-            set: { on in Cm.annotate(id: s.id, done: on) { applyAnnotation(s.id, $0) } }
+            set: { on in AgentctlCLI.annotate(id: s.id, done: on) { applyAnnotation(s.id, $0) } }
         ))
         .toggleStyle(.checkbox)
         .font(.caption)
@@ -530,8 +530,8 @@ struct ContentView: View {
     }
 
     private func setWhen(_ s: Session, _ which: AnnField, _ value: String) {
-        if which == .remind { Cm.annotate(id: s.id, remind: value) { applyAnnotation(s.id, $0) } }
-        else { Cm.annotate(id: s.id, due: value) { applyAnnotation(s.id, $0) } }
+        if which == .remind { AgentctlCLI.annotate(id: s.id, remind: value) { applyAnnotation(s.id, $0) } }
+        else { AgentctlCLI.annotate(id: s.id, due: value) { applyAnnotation(s.id, $0) } }
     }
 
     private func openCustomWhen(_ s: Session, _ which: AnnField) {
@@ -543,7 +543,7 @@ struct ContentView: View {
     private func moveToShelf(_ s: Session, _ shelf: String) {
         guard pendingWriteId == nil else { return }
         pendingWriteId = s.id
-        Cm.annotate(id: s.id, hidden: shelf == "Hidden", deleted: shelf == "Deleted", completion: {
+        AgentctlCLI.annotate(id: s.id, hidden: shelf == "Hidden", deleted: shelf == "Deleted", completion: {
             pendingWriteId = nil
             applyAnnotation(s.id, $0)
         }, onFailure: { pendingWriteId = nil })
@@ -695,7 +695,7 @@ struct ContentView: View {
             }
             Divider()
             Button(s.isDone ? "Not done" : "Done") {
-                Cm.annotate(id: s.id, done: !s.isDone) { applyAnnotation(s.id, $0) }
+                AgentctlCLI.annotate(id: s.id, done: !s.isDone) { applyAnnotation(s.id, $0) }
             }
             Divider()
             Button("Listed") { moveToShelf(s, "Listed") }
@@ -852,7 +852,7 @@ struct ContentView: View {
         if Task.isCancelled { return }
         peekLoadingId = s.id
         do {
-            let turns = try await Cm.peek(id: s.id)
+            let turns = try await AgentctlCLI.peek(id: s.id)
             if Task.isCancelled { return }
             peekCache[s.id] = turns
         } catch {
@@ -865,7 +865,7 @@ struct ContentView: View {
     private func loadCachedRecap(_ id: String) {
         if recapCache[id] != nil || recapLoadingId == id { return }
         Task {
-            if let r = try? await Cm.recap(id: id, cachedOnly: true), r.ok, let t = r.text {
+            if let r = try? await AgentctlCLI.recap(id: id, cachedOnly: true), r.ok, let t = r.text {
                 await MainActor.run { recapCache[id] = t }
             }
         }
@@ -878,7 +878,7 @@ struct ContentView: View {
         recapError[id] = nil
         Task {
             do {
-                let r = try await Cm.recap(id: id, refresh: refresh)
+                let r = try await AgentctlCLI.recap(id: id, refresh: refresh)
                 await MainActor.run {
                     if r.ok, let t = r.text { recapCache[id] = t } else { recapError[id] = r.error ?? "recap failed" }
                     if recapLoadingId == id { recapLoadingId = nil }
@@ -1029,7 +1029,7 @@ struct ContentView: View {
         if p.hidden != nil || p.deleted != nil || p.done != nil { pendingWriteId = head.id }
         var left = targets.count
         for t in targets {
-            Cm.annotate(id: t.id, done: p.done, hidden: p.hidden, deleted: p.deleted, completion: { a in
+            AgentctlCLI.annotate(id: t.id, done: p.done, hidden: p.hidden, deleted: p.deleted, completion: { a in
                 applyAnnotation(t.id, a)
                 left -= 1
                 if left <= 0 { pendingWriteId = nil }
@@ -1072,7 +1072,7 @@ struct ContentView: View {
         if tab == .new {
             guard selIndex < newFlat.count else { return }
             let d = newFlat[selIndex]
-            Cm.launch(dir: d.path, tool: selectedTool); onAction()
+            AgentctlCLI.launch(dir: d.path, tool: selectedTool); onAction()
         } else {
             guard let s = selectedSession else { return }
             resumeSession(s)
@@ -1083,7 +1083,7 @@ struct ContentView: View {
     /// row's own session so a not-yet-committed `selection` @State write can't resume a stale row.
     private func resumeSession(_ s: Session) {
         if !s.cwdConfident && confirmResumeId != s.id { confirmResumeId = s.id; return }
-        Cm.resume(id: s.id, profileHome: profileOverride?.home); onAction()
+        AgentctlCLI.resume(id: s.id, profileHome: profileOverride?.home); onAction()
     }
     private func cancel() {
         if !marked.isEmpty { marked.removeAll(); return }
@@ -1164,17 +1164,17 @@ struct ContentView: View {
     private func loadAll() async {
         loading = true; defer { loading = false }
         do {
-            let p = try await Cm.projects()
+            let p = try await AgentctlCLI.projects()
             projects = p
-            if selectedTool.isEmpty { selectedTool = p.defaultTool.isEmpty ? (p.tools.first?.name ?? "cld") : p.defaultTool }
-            profiles = (try? await Cm.profiles()) ?? []
+            if selectedTool.isEmpty { selectedTool = p.defaultTool.isEmpty ? (p.tools.first?.name ?? "claude") : p.defaultTool }
+            profiles = (try? await AgentctlCLI.profiles()) ?? []
         } catch { errorText = describe(error) }
     }
     private func loadSessions() async {
         guard !sessionsLoaded else { return }
         loading = true; defer { loading = false }
         do {
-            sessions = try await Cm.sessions()
+            sessions = try await AgentctlCLI.sessions()
             sessionsError = nil
         } catch {
             sessionsError = describe(error)
@@ -1200,7 +1200,7 @@ struct ContentView: View {
     private func refreshSessions() async {
         let priorId = selectedSession?.id
         do {
-            sessions = try await Cm.sessions()
+            sessions = try await AgentctlCLI.sessions()
             // Let the editor re-read what the store now holds. Clearing the guard is not enough:
             // when the selection does not change, nothing else calls the loader, and the fields
             // keep the un-normalized text you typed.
@@ -1239,10 +1239,10 @@ struct ContentView: View {
         loadAnnotationFields(id: selectedSession?.id)
     }
     private func describe(_ e: Error) -> String {
-        if case CmError.notFound = e {
+        if case AgentctlCLIError.notFound = e {
             return "agentctl not found. Install it: brew install --cask roypadina/tap/agentctl"
         }
-        if case CmError.failed(let m) = e { return "agentctl error: \(m)" }
+        if case AgentctlCLIError.failed(let m) = e { return "agentctl error: \(m)" }
         // The only realistic cause is an agentctl on PATH older than this app — the cask ships
         // both together, so it takes deliberate effort. Name the fix rather than printing Swift.
         if e is DecodingError {
@@ -1282,7 +1282,7 @@ struct NewDirView: View {
                 Button("Cancel") { dismiss() }
                 Button("Create & open") {
                     if !base.isEmpty && !name.trimmingCharacters(in: .whitespaces).isEmpty {
-                        Cm.newDirThenLaunch(base: base, name: name, tool: tool)
+                        AgentctlCLI.newDirThenLaunch(base: base, name: name, tool: tool)
                         dismiss(); onDone()
                     }
                 }.keyboardShortcut(.defaultAction)

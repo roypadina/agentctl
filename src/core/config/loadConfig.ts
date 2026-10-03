@@ -73,9 +73,9 @@ export function loadConfig(opts: LoadConfigOptions = {}): LoadConfigResult {
   }
 
   const { config, warnings } = validateConfig(raw, { reservedKeys });
-  // Always guarantee cld/cdx exist as launchers (parity with cld.zsh defaults).
+  // Always guarantee claude/cdx exist as launchers.
   if (config.tools.length === 0) {
-    config.tools = [DEFAULT_TOOLS.cld, DEFAULT_TOOLS.cdx];
+    config.tools = [DEFAULT_TOOLS.claude, DEFAULT_TOOLS.cdx];
   }
 
   const result: LoadConfigResult = {

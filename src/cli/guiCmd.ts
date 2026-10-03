@@ -170,7 +170,7 @@ export function registerGuiCommands(program: Command): void {
         console.log(JSON.stringify({ ok: false, error: 'invalid id' }));
         process.exit(3);
       }
-      const bin = process.env.AGENTCTL_CLAUDE_BIN ?? process.env.CCSM_CLAUDE_BIN ?? 'claude';
+      const bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude';
       // Same rule as the TUI (see cli/resume.ts resumeEnv): pin a side profile, but never the
       // default one — its config is ~/.claude.json, so pinning ~/.claude picks a logged-out stub.
       const home = opts.profile ?? s.configDir;

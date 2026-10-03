@@ -62,7 +62,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
     const s = profileOverride ? { ...raw, configDir: profileOverride.home } : raw;
     if (onResume) { onResume(s); return; }
     exit();
-    const bin = process.env.AGENTCTL_CLAUDE_BIN ?? process.env.CCSM_CLAUDE_BIN ?? 'claude';
+    const bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude';
     spawnSync(bin, ['--resume', s.id, '--dangerously-skip-permissions'], {
       cwd: s.cwd, stdio: 'inherit', env: resumeEnv(s),
     });

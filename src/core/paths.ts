@@ -3,8 +3,7 @@ import { join } from 'node:path';
 import { readdirSync, realpathSync, statSync } from 'node:fs';
 
 export function claudeHome(): string {
-  // CCSM_HOME is the pre-0.5.0 name, still honored.
-  return process.env.AGENTCTL_HOME ?? process.env.CCSM_HOME ?? join(homedir(), '.claude');
+  return process.env.AGENTCTL_HOME ?? join(homedir(), '.claude');
 }
 
 export function projectsDir(): string {
@@ -22,7 +21,7 @@ export function sessionsDir(): string {
  * running under a side profile as inactive. `AGENTCTL_HOME` pins the scan to one home.
  */
 export function claudeHomes(): string[] {
-  const pinned = process.env.AGENTCTL_HOME ?? process.env.CCSM_HOME;
+  const pinned = process.env.AGENTCTL_HOME;
   if (pinned) return [pinned];
   const home = homedir();
   const homes = [join(home, '.claude')];

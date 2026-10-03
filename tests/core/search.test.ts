@@ -10,8 +10,8 @@ let cwd: string;
 let origHome: string | undefined;
 
 beforeEach(() => {
-  home = mkdtempSync(join(tmpdir(), 'ccsm-search-'));
-  cwd = mkdtempSync(join(tmpdir(), 'ccsm-search-cwd-'));
+  home = mkdtempSync(join(tmpdir(), 'agentctl-search-'));
+  cwd = mkdtempSync(join(tmpdir(), 'agentctl-search-cwd-'));
   origHome = process.env.AGENTCTL_HOME;
   process.env.AGENTCTL_HOME = home;
   const encoded = cwd.replaceAll('/', '-');

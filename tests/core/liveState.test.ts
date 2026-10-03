@@ -8,7 +8,7 @@ let home: string;
 let origHome: string | undefined;
 
 beforeEach(() => {
-  home = mkdtempSync(join(tmpdir(), 'ccsm-live-'));
+  home = mkdtempSync(join(tmpdir(), 'agentctl-live-'));
   mkdirSync(join(home, 'sessions'), { recursive: true });
   origHome = process.env.AGENTCTL_HOME;
   process.env.AGENTCTL_HOME = home;
@@ -53,7 +53,7 @@ describe('side profiles', () => {
   it('reads sessions from every ~/.claude* profile', () => {
     const fakeHome = mkdtempSync(join(tmpdir(), 'agentctl-profiles-'));
     const origHome = process.env.HOME;
-    const origCcsm = process.env.AGENTCTL_HOME;
+    const origAgentctlHome = process.env.AGENTCTL_HOME;
     process.env.HOME = fakeHome;
     delete process.env.AGENTCTL_HOME;
     try {
@@ -67,7 +67,7 @@ describe('side profiles', () => {
     } finally {
       rmSync(fakeHome, { recursive: true, force: true });
       if (origHome === undefined) delete process.env.HOME; else process.env.HOME = origHome;
-      if (origCcsm === undefined) delete process.env.AGENTCTL_HOME; else process.env.AGENTCTL_HOME = origCcsm;
+      if (origAgentctlHome === undefined) delete process.env.AGENTCTL_HOME; else process.env.AGENTCTL_HOME = origAgentctlHome;
     }
   });
 });

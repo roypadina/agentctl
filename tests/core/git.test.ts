@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { readGitBranch, parseDirtyCount } from '../../src/core/git.js';
 
 let root: string;
-beforeEach(() => { root = mkdtempSync(join(tmpdir(), 'ccsm-git-')); });
+beforeEach(() => { root = mkdtempSync(join(tmpdir(), 'agentctl-git-')); });
 afterEach(() => { rmSync(root, { recursive: true, force: true }); });
 
 describe('readGitBranch', () => {

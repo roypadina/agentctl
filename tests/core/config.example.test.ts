@@ -13,7 +13,7 @@ describe('config.example.toml', () => {
     expect(r.source).toBe('file');
     expect(r.warnings).toEqual([]);
     expect(r.config.groups.length).toBeGreaterThan(0);
-    expect(r.config.tools.map(t => t.name)).toContain('cld');
+    expect(r.config.tools.map(t => t.name)).toContain('claude');
     expect(r.config.ides.length).toBeGreaterThan(0);
   });
 });

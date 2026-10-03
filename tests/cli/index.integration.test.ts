@@ -34,7 +34,7 @@ afterAll(() => {
   rmSync(cwdDir, { recursive: true, force: true });
 });
 
-describe('ccsm CLI', () => {
+describe('agentctl CLI', () => {
   it('ls --json returns an array with the fixture session', () => {
     const r = runCli(['ls', '--json']);
     expect(r.status).toBe(0);

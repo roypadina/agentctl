@@ -13,11 +13,11 @@ open "./Agentctl.app"          # ✦ appears in the menu bar
 ```
 
 `agentctl` must be on `PATH` (or at `/opt/homebrew/bin`, `/usr/local/bin`, `~/.local/bin`). Until brew
-ships it: `cd .. && npm run build && npm link`. For dev you can also set `$ACM_BIN`.
+ships it: `cd .. && npm run build && npm link`. For dev you can also set `$AGENTCTL_BIN`.
 
 - **Left-click ✦** → popover. **Right-click ✦** → Open / Open in window / Quit.
 - **New** tab: groups → all dirs (frecency-sorted, git branch shown). Filter box. Pick a tool
-  (cld/cdx…) bottom-right. Click a dir → opens a session there. **＋ New dir** creates a dir under
+  (claude/cdx…) bottom-right. Click a dir → opens a session there. **＋ New dir** creates a dir under
   any existing dir, then opens it.
 - **Resume** tab: searchable list of existing sessions → click to resume.
 - **⚙ Settings**: edit the shared config — groups, tools, IDEs, default tool, and the terminal

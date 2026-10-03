@@ -1,6 +1,6 @@
-# Agentctl (`agentctl` / `agentctl`)
+# Agentctl (`agentctl`)
 
-Node.js + TypeScript CLI/TUI. One menu with two halves: **New** — start a new Claude/Codex session in a project dir (configurable groups, frecency sort, IDE/tmux/pull/new-dir keys — the old `cld` launcher); **Resume** — search + resume any existing Claude Code session under `~/.claude/` (the old `ccsm`). Command: `agentctl` → New by default; `-r`/`--resume` → Resume. Local-only, no cloud. Built by merging `cld` (zsh) + `ccsm` into one publishable tool — see `docs/superpowers/plans/2026-06-05-agentctl.md`.
+Node.js + TypeScript CLI/TUI. One menu with two halves: **New** — start a new Claude/Codex session in a project dir (configurable groups, frecency sort, IDE/tmux/pull/new-dir keys); **Resume** — search + resume any existing Claude Code session under `~/.claude/`. Command: `agentctl` → New by default; `-r`/`--resume` → Resume. Local-only, no cloud.
 
 ## Quick reference
 
@@ -37,7 +37,7 @@ src/core/                 zero ink/react imports — pure data
   config/                 Agentctl launcher config (TOML, smol-toml)
     types.ts              GroupConfig/ToolConfig/IdeConfig/ThemeConfig, ConfigError
     paths.ts              configPath chain + expandPath (~ / allowlisted $VAR)
-    defaults.ts           DEFAULT_TOOLS (cld/cdx), DEFAULT_RESERVED_KEYS, DEFAULT_CONFIG
+    defaults.ts           DEFAULT_TOOLS (claude/cdx), DEFAULT_RESERVED_KEYS, DEFAULT_CONFIG
     validate.ts           validateConfig(raw, {reservedKeys}) → config + warnings
     loadConfig.ts         load+cache(mtime,size), getTool, clearConfigCache
   groupScan.ts            New-screen scanner: listProjects/parseZDb/sortGroup (z→mtime, no ps/jsonl)
@@ -53,9 +53,6 @@ src/cli/                  zero direct fs reads — goes through sessionRepo
 
 tests/                    vitest, fixture trees under tests/fixtures/
 bin/agentctl                  Node shebang shim → dist/cli.js
-docs/superpowers/
-  specs/2026-05-22-claude-session-manager-design.md
-  plans/2026-05-22-ccsm.md
 ```
 
 ## Conventions
@@ -83,9 +80,9 @@ docs/superpowers/
 
 ## Agentctl launcher conventions
 
-- **Config lives at `~/.config/agentctl/config.toml`** (chain: `$AGENTCTL_CONFIG` → `$XDG_CONFIG_HOME/agentctl` → `~/.config/agentctl`). `$CLD_CONFIG` is intentionally NOT honored — clean break from cld.
-- **`smol-toml`** is the one justified extra dep (TOML is core to New, not a one-off helper). It is TOML-1.0 strict; lax cld configs may need a re-seed (`agentctl config --setup`).
-- **Shell var is lowercase `dir`** — IDE `cmd` / tool `runs` reference `$dir` (matching cld's `eval`). The launch executor sets `dir` (lowercase), shell-quoted, and runs via `${SHELL:-/bin/zsh} -c` (NOT `-lc` — no rc re-source).
+- **Config lives at `~/.config/agentctl/config.toml`** (chain: `$AGENTCTL_CONFIG` → `$XDG_CONFIG_HOME/agentctl` → `~/.config/agentctl`).
+- **`smol-toml`** is the one justified extra dep (TOML is core to New, not a one-off helper). It is TOML-1.0 strict (`agentctl config --setup` re-seeds a broken config).
+- **Shell var is lowercase `dir`** — IDE `cmd` / tool `runs` reference `$dir`. The launch executor sets `dir` (lowercase), shell-quoted, and runs via `${SHELL:-/bin/zsh} -c` (NOT `-lc` — no rc re-source).
 - **New rows show git branch always, and a `±N` dirty count for the highlighted row only.**
   `readGitBranch` is zero-spawn and safe on the scan path; `countDirty` (`git status --porcelain`)
   is the one sanctioned spawn and must stay debounced + limited to the selection.

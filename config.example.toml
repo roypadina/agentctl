@@ -1,7 +1,7 @@
 # Agentctl config — copy to ~/.config/agentctl/config.toml and edit (`agentctl config --setup`).
 
 # Optional. Which tool's launcher is primary (informational).
-default_tool = "cld"
+default_tool = "claude"
 
 # ─── dir groups ──────────────────────────────────────────────────────────────
 # Each group is a section in the New screen. `path` is scanned one level deep for
@@ -20,7 +20,7 @@ color = "#A855F7"
 # Each tool generates a launcher command named `name`. `runs` is a shell command
 # executed in the chosen dir. Adding/removing a tool takes effect in a NEW shell.
 [[tool]]
-name  = "cld"
+name  = "claude"
 runs  = "claude --dangerously-skip-permissions"
 label = " ⚡ Projects "
 color = "#6C91BF"

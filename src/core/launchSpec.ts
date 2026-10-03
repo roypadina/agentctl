@@ -56,12 +56,12 @@ export function sanitizeTmuxName(tool: string, dir: string): string {
 
 const run = (cmd: string, cwd: string): LaunchStep => ({ command: cmd, cwd, stdio: 'inherit' });
 
-/** Map a key + selection to a launch plan, mirroring cld's dispatch. */
+/** Map a key + selection to a launch plan, mirroring the shell launcher dispatch. */
 export function planLaunch(req: LaunchRequest): LaunchPlan {
   const { dir, key, tool, ide, insideTmux } = req;
   const runs = tool.runs;
 
-  // IDE key: open editor (detached) then launch the tool (interactive). cld: `eval cmd; cd && run`.
+  // IDE key: open editor (detached) then launch the tool (interactive). `eval cmd; cd && run`.
   if (ide) {
     return {
       kind: 'interactive',

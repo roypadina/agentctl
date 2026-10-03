@@ -60,7 +60,7 @@ export function resume(
   if (s.active && s.status === 'busy' && !opts.yes) {
     throw new ResumeError(4, `session ${s.id.slice(0, 8)} is busy; pass --yes to resume anyway`);
   }
-  const bin = process.env.AGENTCTL_CLAUDE_BIN ?? process.env.CCSM_CLAUDE_BIN ?? 'claude';
+  const bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude';
   const child = spawn(
     bin,
     ['--resume', s.id, '--dangerously-skip-permissions'],

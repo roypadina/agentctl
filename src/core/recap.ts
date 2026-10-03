@@ -126,7 +126,7 @@ export function spawnRun(bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude') {
 
 /** Generate a fresh recap (no caching). Throws RecapError on empty transcript / missing bin / no output. */
 export async function generateRecap(target: RecapTarget, deps: RecapDeps = {}): Promise<string> {
-  const model = deps.model ?? process.env.AGENTCTL_RECAP_MODEL ?? process.env.CCSM_RECAP_MODEL ?? 'haiku';
+  const model = deps.model ?? process.env.AGENTCTL_RECAP_MODEL ?? 'haiku';
   const bin = deps.bin ?? process.env.AGENTCTL_CLAUDE_BIN ?? 'claude';
   const excerpt = await (deps.buildExcerpt ?? defaultExcerpt)(target.jsonlPath);
   if (!excerpt.trim()) throw new RecapError(4, 'transcript is empty — nothing to recap');

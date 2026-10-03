@@ -34,9 +34,9 @@ const config: AgentctlConfig = {
     { name: 'Frontend', path: '/code/fe', pathRaw: '~/code/fe', color: '#6C91BF' },
     { name: 'Backend', path: '/code/be', pathRaw: '~/code/be', color: '#A855F7' },
   ],
-  tools: [{ name: 'cld', runs: 'claude --x', label: ' c ', color: '#6C91BF' }],
+  tools: [{ name: 'claude', runs: 'claude --x', label: ' c ', color: '#6C91BF' }],
   ides: [{ key: 'ctrl-v', label: 'code', cmd: 'code "$dir"' }],
-  defaultTool: 'cld',
+  defaultTool: 'claude',
   theme: { accent: '#FF9F43', border: '#6C91BF', pointer: '#FF9F43', statusBusy: 'green', statusIdle: 'yellow', statusInactive: 'gray' },
   gui: { terminal: 'Terminal' },
 };

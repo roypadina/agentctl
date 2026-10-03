@@ -23,8 +23,6 @@ body:
     attributes:
       label: How were you running it?
       options:
-        - cm (terminal)
-        - cld (terminal)
         - agentctl (terminal)
         - Mac GUI
     validations:
