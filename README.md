@@ -17,6 +17,7 @@ terminal menu (**`agentctl`**) **and** a native macOS menu-bar app that share on
 [![Release](https://img.shields.io/github/v/release/roypadina/Agentctl?logo=github&label=release)](https://github.com/roypadina/Agentctl/releases/latest)
 [![CI](https://github.com/roypadina/Agentctl/actions/workflows/ci.yml/badge.svg)](https://github.com/roypadina/Agentctl/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-F16061?logo=ko-fi&logoColor=white)](https://ko-fi.com/roypadina)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?logo=github)](CONTRIBUTING.md)
 [![Stars](https://img.shields.io/github/stars/roypadina/Agentctl?style=social)](https://github.com/roypadina/Agentctl/stargazers)
 
@@ -403,10 +404,12 @@ npm test && npm run typecheck && npm run build   # the whole check
 
 ## Support
 
-If Agentctl saves you some clicks and tab-hunting, you can
-[**buy me a coffee on Ko-fi ☕**](https://ko-fi.com/roypadina) — totally optional, always appreciated.
-A **⭐ star** helps just as much.
+If Agentctl saves you clicks and tab-hunting, you can support its development — it's optional and always appreciated.
+
+[![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/roypadina)
+
+A ⭐ on the repo helps just as much.
 
 ## License
 
-[MIT](LICENSE) © Roy Padina
+[MIT](LICENSE) © Roy Padina · [Support on Ko-fi ☕](https://ko-fi.com/roypadina)

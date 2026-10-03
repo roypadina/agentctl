@@ -67,12 +67,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let open = NSMenuItem(title: "Open Agentctl", action: #selector(togglePopover), keyEquivalent: "")
         let win = NSMenuItem(title: "Open in window", action: #selector(openWindow), keyEquivalent: "")
         let quitItem = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
-        for item in [open, win, quitItem] { item.target = self }
-        menu.addItem(open); menu.addItem(win); menu.addItem(.separator()); menu.addItem(quitItem)
+        let about = NSMenuItem(title: "About Agentctl", action: #selector(showAbout), keyEquivalent: "")
+        let support = NSMenuItem(title: "Support on Ko-fi ☕", action: #selector(openKofi), keyEquivalent: "")
+        for item in [open, win, about, support, quitItem] { item.target = self }
+        menu.addItem(open); menu.addItem(win); menu.addItem(.separator())
+        menu.addItem(about); menu.addItem(support); menu.addItem(.separator()); menu.addItem(quitItem)
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
         statusItem.menu = nil // restore left-click → popover after this menu closes
     }
+
+    @objc private func showAbout() {
+        let credits = NSMutableAttributedString(
+            string: "Made by Roy Padina\n\nI'm a software engineer from Israel who builds small, focused Mac tools to fix the little annoyances in my own day — then shares them free and open source.\n\nIf this app saves you time, a coffee on Ko-fi keeps the next one coming. ☕\n\n",
+            attributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.labelColor])
+        credits.append(NSAttributedString(string: "Support on Ko-fi", attributes: [.link: AppLinks.kofi, .font: NSFont.systemFont(ofSize: 11)]))
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
+    }
+
+    @objc private func openKofi() { NSWorkspace.shared.open(AppLinks.kofi) }
 
     @objc private func openWindow() {
         popover.performClose(nil)

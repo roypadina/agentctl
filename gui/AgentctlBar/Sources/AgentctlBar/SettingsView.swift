@@ -16,6 +16,11 @@ private struct EGroup: Identifiable { let id = UUID(); var name: String; var pat
 private struct ETool: Identifiable { let id = UUID(); var name: String; var runs: String; var label: String; var color: String }
 private struct EIde: Identifiable { let id = UUID(); var key: String; var label: String; var cmd: String }
 
+enum AppLinks {
+    static let kofi = URL(string: "https://ko-fi.com/roypadina")!
+    static let github = URL(string: "https://github.com/roypadina/agentctl")!
+}
+
 /// Full config editor. Writes the same config the TUI reads (via `agentctl gui config-save`).
 struct SettingsView: View {
     var onSaved: () -> Void = {}
@@ -49,6 +54,7 @@ struct SettingsView: View {
                     groupsSection
                     toolsSection
                     idesSection
+                    aboutSection
                 }.padding(14)
             }
             Divider()
@@ -134,6 +140,28 @@ struct SettingsView: View {
                     TextField("cmd ($dir)", text: $i.cmd)
                     removeButton { ides.removeAll { $0.id == i.id } }
                 }
+            }
+        }
+    }
+
+    private var aboutSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Divider()
+            sectionTitle("About")
+            HStack(spacing: 12) {
+                Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 48, height: 48)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Agentctl").font(.headline)
+                    Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")")
+                        .font(.caption).foregroundColor(.secondary)
+                }
+            }
+            Text("Made by Roy Padina").bold()
+            Text("I'm a software engineer from Israel who builds small, focused Mac tools to fix the little annoyances in my own day — then shares them free and open source.")
+            Text("If this app saves you time, a coffee on Ko-fi keeps the next one coming. ☕")
+            HStack {
+                Button("Support on Ko-fi ☕") { NSWorkspace.shared.open(AppLinks.kofi) }.buttonStyle(.borderedProminent)
+                Button("GitHub") { NSWorkspace.shared.open(AppLinks.github) }
             }
         }
     }
