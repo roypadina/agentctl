@@ -45,20 +45,28 @@ describe('resume', () => {
     ).toThrow(/busy/);
   });
 
-  it('spawns claude with --resume and --dangerously-skip-permissions', () => {
+  it('spawns claude with --resume and --permission-mode auto by default', () => {
     const spawn = vi.fn(() => ({ status: 0, error: undefined })) as never;
     const exit = vi.fn();
-    resume(record(), {}, { exists: () => true, spawn, exit: exit as never });
+    resume(record(), {}, { exists: () => true, spawn, exit: exit as never, permissionMode: () => 'auto' });
     expect(spawn).toHaveBeenCalledOnce();
     const call = (spawn as unknown as { mock: { calls: unknown[][] } }).mock.calls[0];
     expect(call[0]).toBe('claude');
     expect(call[1]).toEqual([
       '--resume',
       'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-      '--dangerously-skip-permissions',
+      '--permission-mode',
+      'auto',
     ]);
     expect((call[2] as { cwd: string }).cwd).toBe('/tmp');
     expect(exit).toHaveBeenCalledWith(0);
+  });
+
+  it('opt-in bypassPermissions resumes with --dangerously-skip-permissions', () => {
+    const spawn = vi.fn(() => ({ status: 0, error: undefined })) as never;
+    resume(record(), {}, { exists: () => true, spawn, exit: vi.fn() as never, permissionMode: () => 'bypassPermissions' });
+    const call = (spawn as unknown as { mock: { calls: unknown[][] } }).mock.calls[0];
+    expect(call[1]).toEqual(['--resume', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '--dangerously-skip-permissions']);
   });
 
   it('throws ResumeError(127) when claude binary missing', () => {

@@ -13,7 +13,7 @@ export interface GroupConfig {
 export interface ToolConfig {
   /** Generates a launcher command of this name (claude, cdx, …). */
   name: string;
-  /** Shell command line run in the chosen dir (e.g. "claude --dangerously-skip-permissions"). */
+  /** Shell command line run in the chosen dir (e.g. "claude --permission-mode auto"). */
   runs: string;
   /** fzf-style border label. */
   label: string;
@@ -37,11 +37,15 @@ export interface ThemeConfig {
   statusInactive: string;
 }
 
+/** Claude Code permission mode agentctl launches/resumes with. */
+export type PermissionMode = 'auto' | 'bypassPermissions';
+
 export interface AgentctlConfig {
   groups: GroupConfig[];
   tools: ToolConfig[];
   ides: IdeConfig[];
   defaultTool: string;
+  permissionMode: PermissionMode;
   theme: ThemeConfig;
 }
 
@@ -53,6 +57,7 @@ export type ConfigWarningCode =
   | 'missing-group-path'
   | 'dup-tool-name'
   | 'unknown-default-tool'
+  | 'bad-permission-mode'
   | 'unknown-var';
 
 export interface ConfigWarning {

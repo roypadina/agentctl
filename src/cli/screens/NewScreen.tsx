@@ -44,7 +44,7 @@ export function NewScreen({ config, warnings, projects, configError, onSwitchTab
     const i = tools.findIndex((t) => t.name === (config?.defaultTool ?? 'claude'));
     return i >= 0 ? i : 0;
   });
-  const tool = tools[toolIdx] ?? (config ? getTool(config, config.defaultTool) : { name: 'claude', runs: 'claude --dangerously-skip-permissions', label: '', color: '#6C91BF' });
+  const tool = tools[toolIdx] ?? (config ? getTool(config, config.defaultTool) : { name: 'claude', runs: 'claude --permission-mode auto', label: '', color: '#6C91BF' });
 
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);

@@ -37,6 +37,7 @@ const config: AgentctlConfig = {
   tools: [{ name: 'claude', runs: 'claude --x', label: ' c ', color: '#6C91BF' }],
   ides: [{ key: 'ctrl-v', label: 'code', cmd: 'code "$dir"' }],
   defaultTool: 'claude',
+  permissionMode: 'auto',
   theme: { accent: '#FF9F43', border: '#6C91BF', pointer: '#FF9F43', statusBusy: 'green', statusIdle: 'yellow', statusInactive: 'gray' },
 };
 const dir = (name: string, group: string, color: string): ProjectDir =>

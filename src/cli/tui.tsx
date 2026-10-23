@@ -12,6 +12,8 @@ import { copyToClipboard, resumeCommand } from '../core/clipboard.js';
 import { listProfiles, profileAccount, type Profile } from '../core/profiles.js';
 import { fuzzyRank } from '../core/fuzzy.js';
 import { getRecap, readCachedRecap, spawnRun } from '../core/recap.js';
+import { loadPermissionMode } from '../core/config/loadConfig.js';
+import { permissionArgs } from '../core/config/defaults.js';
 import { windowFor, scrollbar } from './viewport.js';
 import { useKeyChunk, upCount, downCount } from './useKeyChunk.js';
 import {
@@ -63,7 +65,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
     if (onResume) { onResume(s); return; }
     exit();
     const bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude';
-    spawnSync(bin, ['--resume', s.id, '--dangerously-skip-permissions'], {
+    spawnSync(bin, ['--resume', s.id, ...permissionArgs(loadPermissionMode())], {
       cwd: s.cwd, stdio: 'inherit', env: resumeEnv(s),
     });
   };
