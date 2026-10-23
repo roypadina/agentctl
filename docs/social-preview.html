@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- Source of docs/social-preview.png (1280×640). Re-render: serve this dir over http, then
+     "Microsoft Edge" --headless=new --hide-scrollbars --window-size=1280,640 --screenshot=social-preview.png http://127.0.0.1:<port>/social-preview.html -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    color: #eef1ff;
+    background:
+      radial-gradient(900px 520px at 78% 8%, rgba(70, 80, 190, .45), transparent 70%),
+      radial-gradient(700px 420px at 0% 100%, rgba(40, 90, 140, .35), transparent 70%),
+      #0b1022;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 64px 0 60px;
+  }
+  .left { width: 590px; }
+  .brand { display: flex; align-items: center; gap: 22px; }
+  .icon {
+    width: 66px; height: 66px; border-radius: 16px;
+    background: linear-gradient(145deg, #8c8cff, #5b5be8);
+    box-shadow: 0 0 28px rgba(120, 120, 255, .55);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 40px; line-height: 1;
+  }
+  h1 { font-size: 68px; font-weight: 800; letter-spacing: -1.5px; }
+  .tag { margin-top: 26px; font-size: 30px; font-weight: 700; line-height: 1.45; }
+  .tag b { color: #8f9bff; font-weight: 700; }
+  .feat { margin-top: 26px; font-size: 21px; font-weight: 700; color: #8f9bff; line-height: 1.3; }
+  .install {
+    margin-top: 32px; padding: 18px 22px; border-radius: 12px;
+    background: #060a16; border: 1px solid #262c48;
+    font-family: "SF Mono", Menlo, monospace; font-size: 21px; line-height: 1.3; color: #7ee2a8;
+    display: flex; gap: 14px;
+  }
+  .install .p { color: #5c6385; }
+  .url { margin-top: 30px; font-size: 20px; font-weight: 700; color: #8a93b8; }
+
+  .term {
+    width: 540px; border-radius: 16px; overflow: hidden;
+    background: #0d1226; border: 1px solid #262c48;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .55);
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  .bar { height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: #121831; border-bottom: 1px solid #222844; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .bar .t { margin-left: 18px; font-size: 14px; color: #8a93b8; }
+  .body { padding: 22px 22px 18px; font-size: 14px; }
+  .cmd { font-size: 15px; margin-bottom: 18px; }
+  .cmd .g { color: #7ee2a8; } .cmd .s { color: #5c6385; margin-left: 12px; }
+  .row { padding: 11px 14px; border-radius: 9px; margin-bottom: 4px; }
+  .row .n { font-weight: 700; font-size: 15px; color: #eef1ff; }
+  .row .m { margin-top: 6px; font-size: 12.5px; color: #7c84a8; }
+  .row .m .br { color: #8f9bff; }
+  .sel { background: #1a2150; border: 1px solid #5b63d6; display: flex; justify-content: space-between; }
+  .sel .k { color: #8f9bff; }
+  .peek { margin: 8px 0 8px; padding: 11px 14px; border-left: 3px solid #5b63d6; background: #121831; border-radius: 0 8px 8px 0; color: #b8bfdc; font-size: 12.5px; line-height: 1.55; }
+  .foot { margin-top: 14px; font-size: 12px; color: #5c6385; word-spacing: 2px; }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="brand"><div class="icon">✦</div><h1>Agentctl</h1></div>
+    <div class="tag">Start or resume your <b>Claude Code</b><br>&amp; <b>Codex</b> sessions — from your terminal.</div>
+    <div class="feat">Terminal TUI · Fuzzy transcript resume ·<br>Frecency launcher · Free &amp; MIT</div>
+    <div class="install"><span class="p">$</span><span>brew install --cask<br>roypadina/tap/agentctl</span></div>
+    <div class="url">github.com/roypadina/agentctl</div>
+  </div>
+
+  <div class="term">
+    <div class="bar">
+      <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
+      <span class="t">agentctl --resume</span>
+    </div>
+    <div class="body">
+      <div class="cmd"><span class="g">$</span> agentctl -r<span class="s">search: refactor</span></div>
+      <div class="row sel">
+        <div><div class="n">✧ Refactor auth middleware</div><div class="m">~/code/api · <span class="br">main</span> · 2h ago · ● idle</div></div>
+        <div class="k">↵</div>
+      </div>
+      <div class="peek">› "the token expiry check uses &lt; not &lt;=, fix the off-by-one and add a test…"</div>
+      <div class="row"><div class="n">Refactor invoice PDF export</div><div class="m">~/code/billing · <span class="br">feat/pdf</span> · yesterday</div></div>
+      <div class="row"><div class="n">Refactor onboarding flow</div><div class="m">~/code/web · <span class="br">main</span> · 3d ago</div></div>
+      <div class="foot">⇥ New ⇄ Resume &nbsp; ⇧⇥ tool &nbsp; ? help</div>
+    </div>
+  </div>
+</body>
+</html>
