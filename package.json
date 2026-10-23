@@ -1,16 +1,16 @@
 {
-  "name": "agentctl",
-  "version": "0.11.0",
-  "description": "One menu to start new Claude/Codex sessions in a project, or search + resume existing ones",
+  "name": "@roypadina/agentctl",
+  "version": "0.11.1",
+  "description": "Start and resume Claude Code & Codex sessions from one terminal menu — fuzzy-resume past sessions with transcript preview.",
   "type": "module",
   "license": "MIT",
   "author": "Roy Padina",
-  "homepage": "https://github.com/roypadina/Agentctl#readme",
+  "homepage": "https://github.com/roypadina/agentctl#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/roypadina/Agentctl.git"
+    "url": "git+https://github.com/roypadina/agentctl.git"
   },
-  "bugs": "https://github.com/roypadina/Agentctl/issues",
+  "bugs": "https://github.com/roypadina/agentctl/issues",
   "bin": {
     "agentctl": "bin/agentctl"
   },
@@ -18,7 +18,8 @@
     "dist",
     "bin",
     "config.example.toml",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=18"
@@ -46,5 +47,18 @@
     "tsx": "^4.22.3",
     "typescript": "^5.5.0",
     "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "cli",
+    "tui",
+    "session-manager",
+    "resume",
+    "coding-agent",
+    "ai-agent"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

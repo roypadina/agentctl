@@ -32,7 +32,7 @@ Examples of unacceptable behavior:
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the
-maintainer at **roypadina@gmail.com**. All complaints will be reviewed and investigated
+maintainer through GitHub: open a private report via **Security → Report a vulnerability**, or open an issue asking for a private channel. All complaints will be reviewed and investigated
 promptly and fairly.
 
 ## Attribution

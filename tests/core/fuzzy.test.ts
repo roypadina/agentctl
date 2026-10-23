@@ -55,7 +55,7 @@ describe('fuzzyRank', () => {
 // A subsequence whose spread penalty exceeds its bonuses is noise, not a match.
 describe('fuzzyMatch — relevance floor', () => {
   const unrelated =
-    'Create reeco-create-plugin wrapper with naming and deduplication  ~/Code/Reeco/Claude-Code-Plugins';
+    'Create example-create-plugin wrapper with naming and deduplication  ~/Code/Work/Example-Plugins';
 
   it('rejects a scattered subsequence that scores below neutral', () => {
     // "LanGuard" letters appear scattered across `unrelated` (pre-fix score ≈ -2.9).
@@ -79,14 +79,14 @@ describe('fuzzyRank — never surfaces an unrelated session as the only match', 
   const sessions = [
     { name: 'LanGurd', text: 'LanGurd  ~/Code  2cb6745a-6bda-4e44-9d98-9b3da5fb1f30' },
     {
-      name: 'reeco',
-      text: 'Create reeco-create-plugin wrapper with naming and deduplication  ~/Code/Reeco/Claude-Code-Plugins',
+      name: 'example',
+      text: 'Create example-create-plugin wrapper with naming and deduplication  ~/Code/Work/Example-Plugins',
     },
   ];
 
   it('returns no matches when only a garbage scattered subsequence exists', () => {
     // "LanGuard" (with the 2nd "a") matches neither session meaningfully → empty list,
-    // NOT the unrelated reeco session (which clicking would have resumed).
+    // NOT the unrelated example session (which clicking would have resumed).
     expect(fuzzyRank('LanGuard', sessions, (s) => s.text).map((r) => r.item.name)).toEqual([]);
   });
 

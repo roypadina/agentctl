@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/demo.gif" alt="Agentctl demo — fuzzy-filter your projects, switch to Resume, search a past Claude Code session, and peek its transcript before resuming." width="760">
+<img src="docs/demo.gif" alt="agentctl demo — fuzzy-filter your projects, switch to Resume, search a past Claude Code session, and peek its transcript before resuming." width="760">
 
-# Agentctl
+# agentctl
 
 ### One menu for every Claude & Codex session — start a new one in any project, or search and resume an old one.
 
@@ -10,15 +10,17 @@ A fast launcher for coding-agent sessions: pick a project and start **`claude`**
 fuzzy-search and **resume** any past Claude Code session — with a live transcript preview. Runs in
 your terminal as **`agentctl`**.
 
-[![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-tested-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
+[![Linux](https://img.shields.io/badge/Linux-best--effort-FCC624?logo=linux&logoColor=black)](#install)
 [![Node](https://img.shields.io/badge/Node-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![npm](https://img.shields.io/npm/v/@roypadina/agentctl?logo=npm)](https://www.npmjs.com/package/@roypadina/agentctl)
 [![Homebrew](https://img.shields.io/badge/brew-roypadina%2Ftap-FBB040?logo=homebrew&logoColor=white)](https://github.com/roypadina/homebrew-tap)
-[![Release](https://img.shields.io/github/v/release/roypadina/Agentctl?logo=github&label=release)](https://github.com/roypadina/Agentctl/releases/latest)
-[![CI](https://github.com/roypadina/Agentctl/actions/workflows/ci.yml/badge.svg)](https://github.com/roypadina/Agentctl/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/roypadina/agentctl?logo=github&label=release)](https://github.com/roypadina/agentctl/releases/latest)
+[![CI](https://github.com/roypadina/agentctl/actions/workflows/ci.yml/badge.svg)](https://github.com/roypadina/agentctl/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-F16061?logo=ko-fi&logoColor=white)](https://ko-fi.com/roypadina)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?logo=github)](CONTRIBUTING.md)
-[![Stars](https://img.shields.io/github/stars/roypadina/Agentctl?style=social)](https://github.com/roypadina/Agentctl/stargazers)
+[![Stars](https://img.shields.io/github/stars/roypadina/agentctl?style=social)](https://github.com/roypadina/agentctl/stargazers)
 
 </div>
 
@@ -47,7 +49,7 @@ You start coding-agent sessions all day — `claude` here, `codex` there — and
 back into one from yesterday but can't remember which folder it was in. Claude Code stores every
 session under `~/.claude/`, but there's no good way to *find* one.
 
-Agentctl is two halves of that workflow in one tool:
+agentctl is two halves of that workflow in one tool:
 
 - **New** — pick a project directory (grouped, frecency-sorted, fuzzy-filtered) and launch your agent
   there. Open it in your IDE first, in tmux, after a `git pull`, or create a brand-new directory on the fly.
@@ -66,7 +68,7 @@ It's **local-only** — it reads `~/.claude/` and your project folders, and runs
 | 🧠 **AI recap** | `r` summarizes a session (what it was doing, decisions, state, follow-ups) via `claude -p` on haiku, cached. Decide whether to resume without reading the whole transcript. |
 | ⌨️ **Two tabs, one keystroke** | Start in **New**; `⇥` flips to **Resume**; `⇧⇥` cycles the tool. |
 | 🧰 **Your tools & IDEs** | Configure any agent command (`claude`, `codex`, …) and `^`-key IDE binds (VS Code, Rider, …). |
-| 🪄 **tmux / pull / Finder / new-dir** | One-key open-in-tmux, `git pull` first, reveal in Finder, or make a new directory anywhere. |
+| 🪄 **tmux / pull / file manager / new-dir** | One-key open-in-tmux, `git pull` first, open the folder, or make a new directory anywhere. |
 | 🏷️ **Names, notes, flags, reminders** | Rename any session (as often as you like), pin a note to it, tag it `todo`, mark it done, or set a reminder — from the picker, the CLI, or from inside the session itself. |
 | 👥 **Every Claude profile** | Run several accounts via `CLAUDE_CONFIG_DIR`? All of their sessions show up, live status included — and resume runs under the right profile instead of silently using the wrong account. |
 | 🗂️ **One config file** | Groups, tools and IDE binds live in one TOML file — `agentctl config --edit` opens it. |
@@ -74,33 +76,21 @@ It's **local-only** — it reads `~/.claude/` and your project folders, and runs
 
 ## Screenshots
 
-Start in **New**, `⇥` to **Resume**:
+Resume: every session across your Claude profiles, with details for the highlighted one.
 
-```
- resume   24 sessions  ·  3 active  ·  2/24      ● busy  ● idle  ○ inactive
- ╭──────────────────────────────────────────────┬────────────┬──────────────╮
- │   SESSION                                      │ BRANCH     │ LAST USED    │
- ├──────────────────────────────────────────────┼────────────┼──────────────┤
- │ ▶ ● Agentctl — TUI keyboard nav            │ main       │ 2m ago       │
- │   ○ Recover Edge profiles after crash          │ main       │ 19h ago      │
- │   ○ reeco-item-classifier POC                  │ poc/bert   │ 2d ago       │
- ╰──────────────────────────────────────────────┴────────────┴──────────────╯
- ╭ Agentctl — TUI keyboard nav ─────────────────────────────────────────╮
- │ a1b2c3d4 · ● busy · ⎇ main                                                │
- │ started Jun 5 13:06 · last used Jun 9 17:30 (2m ago)                      │
- │ ~/Code/Padina/Agentctl                                                │
- │ recap  • Redesigned Resume as a bordered table with a details pane.       │
- │        • Added an AI recap (claude -p · haiku, cached).                   │
- ╰───────────────────────────────────────────────────────────────────────────╯
+<img src="docs/screenshots/resume.png" alt="agentctl Resume tab listing six sessions with a details pane" width="760">
 
- ↑/↓ move  ·  ⏎ resume  ·  r recap  ·  p peek  ·  / filter  ·  s search  ·  ? help  ·  q quit
-```
+Peek at the conversation before you resume it:
+
+<img src="docs/screenshots/peek.png" alt="agentctl transcript peek" width="760">
+
+(Rendered from a fake demo dataset: `bash docs/demo-fixture.sh && vhs docs/demo.tape`.)
 
 ## Install
 
-> **Requires macOS** and **Node 18+** (Homebrew installs Node as a dependency).
+> **Requirements:** Node 18 or later. Tested on macOS; Linux is best-effort (the same code runs, CI covers it, but it is not used daily). Windows is not supported.
 
-### Homebrew
+### Homebrew (macOS)
 
 ```bash
 brew install --cask roypadina/tap/agentctl
@@ -109,14 +99,20 @@ brew install --cask roypadina/tap/agentctl
 This puts **`agentctl`** on your `PATH`. Upgrading from 0.10 or older also removes the old
 menu-bar app (`brew upgrade --cask agentctl`).
 
+### npm (macOS and Linux)
+
+```bash
+npm i -g @roypadina/agentctl
+```
+
 ### From source
 
 ```bash
-git clone https://github.com/roypadina/Agentctl.git
-cd Agentctl
+git clone https://github.com/roypadina/agentctl.git
+cd agentctl
 npm install
 npm run build
-npm link            # puts agentctl + agentctl on your PATH
+npm link            # puts agentctl on your PATH
 ```
 
 First run sets up a starter config: `agentctl config --setup`.
@@ -124,12 +120,11 @@ First run sets up a starter config: `agentctl config --setup`.
 ## The terminal menu
 
 `agentctl` opens the menu — **New** by default, `⇥` to **Resume** (or jump straight there with `-r`).
-Want `claude`/`cdx`-style per-tool shortcuts? Add your own shell aliases.
 
 | Command | Opens |
 |---|---|
-| `agentctl` &nbsp;·&nbsp; `agentctl` | New-session menu (`⇥` to Resume) |
-| `agentctl -r` &nbsp;·&nbsp; `agentctl -r` | Resume menu |
+| `agentctl` | New-session menu (`⇥` to Resume) |
+| `agentctl -r` | Resume menu |
 
 Plus non-interactive subcommands:
 
@@ -146,7 +141,7 @@ agentctl config --setup | --edit | --path         # manage the shared config
 ### Keys
 
 **New** — `↑/↓` move · type to fuzzy-filter · `↵` launch · `⇥` Resume · `⇧⇥` cycle tool · `^n` new dir ·
-`^t` tmux · `^p` pull · `^f` Finder · `^`-key IDEs · `?` full keymap · `esc` back.
+`^t` tmux · `^p` pull · `^f` file manager · `^`-key IDEs · `?` full keymap · `esc` back.
 
 **Resume** — `↑/↓` (or `j/k`) move · `pgup/pgdn` page · `g/G` first/last · `↵` resume · `p` peek · `r` recap ·
 `/` fuzzy-filter · `s` full-text search · `^r` refresh · `⇥` New · `?` help · `q` quit.
@@ -219,8 +214,7 @@ The [`agentctl-sessions` plugin](https://github.com/roypadina/padina-claude-code
 
 ## Several Claude accounts
 
-Claude Code keeps each account in its own `CLAUDE_CONFIG_DIR` (`~/.claude`, `~/.claude2`, …). Agent CLI
-Menu scans **all** of them, so every session is listed with the correct live status, and resuming pins
+Claude Code keeps each account in its own `CLAUDE_CONFIG_DIR` (`~/.claude`, `~/.claude2`, …). agentctl scans **all** of them, so every session is listed with the correct live status, and resuming pins
 `CLAUDE_CONFIG_DIR` to the profile that session belongs to. To *start* new sessions on a given account,
 add one tool per profile:
 
@@ -286,7 +280,7 @@ title → the first user prompt. Status (`busy`/`idle`/`inactive`) is derived fr
 `kill -0` / `ps` check. Working directories are decoded from Claude Code's ambiguous `-`-encoded folder
 names by walking the filesystem — and flagged when the result isn't certain.
 
-📖 Full docs are in the **[Wiki](https://github.com/roypadina/Agentctl/wiki)** (Installation · Commands · Configuration · Architecture · FAQ). See [`CLAUDE.md`](CLAUDE.md) for the contributor module map.
+📖 Full docs are in the **[Wiki](https://github.com/roypadina/agentctl/wiki)** (Installation · Commands · Configuration · Architecture · FAQ). See [`CLAUDE.md`](CLAUDE.md) for the contributor module map.
 
 ## Is it safe?
 
@@ -301,6 +295,7 @@ names by walking the filesystem — and flagged when the result isn't certain.
 
 ```bash
 brew uninstall --cask agentctl        # if installed via Homebrew
+# npm uninstall -g @roypadina/agentctl   # if installed from npm
 # or: npm unlink -g agentctl          # if installed from source via npm link
 
 rm -rf ~/.config/agentctl             # forget config (optional)
@@ -317,7 +312,7 @@ npm test && npm run typecheck && npm run build   # the whole check
 
 ## Support
 
-If Agentctl saves you clicks and tab-hunting, you can support its development — it's optional and always appreciated.
+If agentctl saves you clicks and tab-hunting, you can support its development — it's optional and always appreciated.
 
 [![Support me on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/roypadina)
 
