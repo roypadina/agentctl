@@ -31,8 +31,6 @@ runs  = "codex --dangerously-bypass-approvals-and-sandbox"
 label = " ✦ Codex "
 color = "#A855F7"
 
-[gui]
-terminal = "default"
 TOML
 
 # ── fake resumable sessions ──  args: <proj> <uuid> <minutes-ago> <prompt> <a1> <u2> <a2>

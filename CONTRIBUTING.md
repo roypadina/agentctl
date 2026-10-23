@@ -23,11 +23,9 @@ npm run build       # tsup → dist/
 
 # run from source without building:
 npx tsx src/cli/index.ts        # agentctl (New; -r for Resume)
-# build the Mac GUI:
-bash gui/build-app.sh && open "gui/Agentctl.app"
 ```
 
-Requirements: Node 18+, macOS 12+ (Swift 5.9 / Xcode 15+ for the GUI).
+Requirements: Node 18+, macOS.
 
 ## Architecture
 
@@ -38,8 +36,6 @@ A strict two-layer split — please keep it intact:
 - **`src/cli/`** — the ink TUI and the non-interactive subcommands. The only layer that touches
   presentation. UI in `tui.tsx` / screens gets smoke tests only; full UX validation is manual in a
   real terminal.
-- **`gui/`** — a native SwiftUI app that is a thin client over `agentctl gui …`. It imports none of the
-  Node code.
 
 See [`CLAUDE.md`](CLAUDE.md) for the full module map and conventions.
 
@@ -49,18 +45,17 @@ See [`CLAUDE.md`](CLAUDE.md) for the full module map and conventions.
 - **Streaming, never load whole files.** Session `.jsonl` can be MB-scale — use `readline` + `for await`.
 - **Tiny dependencies.** The runtime dep list is intentionally small (`chalk`, `commander`, `ink`,
   `ink-text-input`, `react`, `smol-toml`). Adding one needs justification.
-- Match the surrounding code style. No force-unwraps in non-test Swift.
+- Match the surrounding code style.
 
 ## Workflow
 
 1. **Fork** and branch: `git checkout -b feature/my-thing`.
 2. Make your change. **Add or update tests.**
-3. `npm test && npm run typecheck && npm run build` — everything must pass. (Touching the GUI?
-   `swift build` in `gui/AgentctlBar` too.)
+3. `npm test && npm run typecheck && npm run build` — everything must pass.
 4. Commit with a clear message and open a **Pull Request** against `main`.
 5. CI must be green and the maintainer must approve before merge.
 
 ## Reporting bugs / requesting features
 
 Use the [issue templates](https://github.com/roypadina/Agentctl/issues/new/choose). For bugs,
-include your macOS + Node versions and how you launched it (`agentctl` / `agentctl` / GUI).
+include your macOS + Node versions and how you launched it.

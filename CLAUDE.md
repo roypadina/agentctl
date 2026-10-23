@@ -14,6 +14,7 @@ Node.js + TypeScript CLI/TUI. One menu with two halves: **New** — start a new 
 | Run built binary | `node bin/agentctl <args>` |
 | Watch tests | `npm run test:watch` |
 | Dev build watch | `npm run dev` |
+| Release zip (cask asset) | `sh scripts/build-release.sh` → `release/agentctl.zip` (CLI + prod `node_modules`) |
 
 `bin/agentctl` is the production entry — it just `import()`s `dist/cli.js`, so you must run `npm run build` before it works. For TS-direct runs use `npx tsx src/cli/index.ts`.
 
@@ -127,10 +128,8 @@ Then drop a leading `/word` or `/skill:command ` prefix from the first user prom
 - Windows support (`~/.claude` location and `kill -0`/`ps` semantics differ).
 - File-watcher / live auto-refresh (`r` key manual refresh only).
 - True fuzzy match (current search is whitespace-split AND of case-insensitive substrings).
-- Electron/Tauri/web GUI. (A native SwiftUI menu-bar + window GUI lives in `gui/` — the picker
-  itself: New/Resume lists, new-dir, and a full config editor. It's a thin view over `agentctl gui …`
-  (projects/sessions/new-dir/launch/resume/terminals/config-get/config-save) and never reads
-  `~/.claude` or parses TOML itself. Sessions open in the configured terminal; config is shared
-  with the TUI.)
+- Any GUI (Electron/Tauri/web/native). A SwiftUI menu-bar app shipped in 0.1–0.10 and was removed in
+  0.11.0 along with the `agentctl gui …` back-end and the `[gui]` config section — the CLI/TUI is the
+  product. An old config's `[gui]` table is ignored, not an error.
 - Session deletion, archival, tagging, favorites.
 - Multi-window resume dispatch via Terminal.app / iTerm AppleScript.

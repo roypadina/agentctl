@@ -3,6 +3,27 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.11.0] — 2026-10-23
+
+### Removed — BREAKING
+
+- **The macOS menu-bar app is gone.** Agentctl is now the terminal menu only (`agentctl`,
+  `agentctl -r`) plus the `agentctl-sessions` Claude Code plugin. Removed with it: the SwiftUI app
+  (`gui/`, `Agentctl.app`), the `agentctl gui …` back-end subcommands, and the `[gui]` config
+  section (`terminal`, `launch_command`, `hotkey`). An existing config's `[gui]` table is ignored,
+  not an error.
+
+### Changed
+
+- **The Homebrew cask installs only the `agentctl` CLI.** `brew upgrade --cask agentctl` removes
+  the old app from `/Applications` and keeps `agentctl` on your `PATH`. No Gatekeeper/quarantine
+  step any more — there is no app bundle to open.
+
+### Fixed
+
+- **`agentctl config --setup` on a Homebrew install.** The bundled CLI shipped without
+  `config.example.toml`, so seeding a starter config failed; the release now includes it.
+
 ## [0.10.0] — 2026-10-03
 
 ### Changed — BREAKING

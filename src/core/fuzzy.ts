@@ -1,5 +1,5 @@
 // fzf-v1-style fuzzy subsequence scorer. Pure core — reused by the New + Resume filters
-// (and mirrored ~40 LOC in the Swift GUI). Returns matched positions so callers can highlight.
+// Returns matched positions so callers can highlight.
 // No substring pre-filter anywhere: that would exclude exactly the gapped matches this exists to surface.
 
 export interface FuzzyResult {

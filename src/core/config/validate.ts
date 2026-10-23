@@ -1,5 +1,5 @@
 import { expandPath } from './paths.js';
-import { DEFAULT_COLOR, DEFAULT_THEME, DEFAULT_GUI } from './defaults.js';
+import { DEFAULT_COLOR, DEFAULT_THEME } from './defaults.js';
 import {
   ConfigError,
   type AgentctlConfig,
@@ -135,21 +135,12 @@ export function validateConfig(
     defaultTool = tools[0].name;
   }
 
-  // gui
-  const guiRaw = (raw.gui && typeof raw.gui === 'object') ? raw.gui as Record<string, unknown> : {};
-  const gui = {
-    terminal: asString(guiRaw.terminal) ?? DEFAULT_GUI.terminal,
-    launchCommand: asString(guiRaw.launch_command),
-    hotkey: asString(guiRaw.hotkey),
-  };
-
   const config: AgentctlConfig = {
     groups,
     tools,
     ides,
     defaultTool,
     theme: buildTheme(raw.theme),
-    gui,
   };
   return { config, warnings };
 }

@@ -29,7 +29,3 @@ jobs:
 
       - name: Build (tsup)
         run: npm run build
-
-      - name: Build the Mac GUI (Swift package)
-        working-directory: gui/AgentctlBar
-        run: swift build

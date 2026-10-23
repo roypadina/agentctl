@@ -5,9 +5,7 @@ dist/
 .env
 coverage/
 
-# GUI build artifacts
-gui/AgentctlBar/.build/
-gui/*.app/
-gui/*.zip
+# release build artifacts
+release/
 docs/DISTRIBUTION.md
 docs/awesome-claude-code-submission.md

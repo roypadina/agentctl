@@ -10,7 +10,6 @@ import { renderPeek } from './peek.js';
 import { resume, ResumeError } from './resume.js';
 import { getRecap, RecapError } from '../core/recap.js';
 import { registerConfigCommands } from './config.js';
-import { registerGuiCommands } from './guiCmd.js';
 import { registerAnnotateCommands } from './annotate.js';
 import { registerHookCommands } from './hook.js';
 
@@ -183,7 +182,6 @@ Where things live
   registerAnnotateCommands(program);
   registerHookCommands(program);
   registerConfigCommands(program);
-  registerGuiCommands(program);
   return program;
 }
 

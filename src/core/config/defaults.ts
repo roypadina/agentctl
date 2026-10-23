@@ -22,13 +22,10 @@ export const DEFAULT_THEME: ThemeConfig = {
 /** enter + the reserved launcher keys. Convenience default; the New screen owns the real set (B12). */
 export const DEFAULT_RESERVED_KEYS = new Set(['enter', 'ctrl-f', 'ctrl-p', 'ctrl-t', 'ctrl-n']);
 
-export const DEFAULT_GUI = { terminal: 'default' as const };
-
 export const DEFAULT_CONFIG: AgentctlConfig = {
   groups: [],
   tools: [DEFAULT_TOOLS.claude, DEFAULT_TOOLS.cdx],
   ides: [],
   defaultTool: 'claude',
   theme: DEFAULT_THEME,
-  gui: { ...DEFAULT_GUI },
 };
