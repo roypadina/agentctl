@@ -41,6 +41,7 @@ your terminal as **`agentctl`**.
 - [Is it safe?](#is-it-safe)
 - [Uninstall](#uninstall)
 - [Contributing](#contributing)
+- [Feature requests and contributions](#feature-requests-and-contributions)
 - [Support](#support)
 - [License](#license)
 
@@ -311,6 +312,14 @@ PRs welcome! `main` is protected — fork, branch, add tests, and open a PR. See
 ```bash
 npm test && npm run typecheck && npm run build   # the whole check
 ```
+
+## Feature requests and contributions
+
+Have an idea for Agentctl? [Request a feature](https://github.com/roypadina/Agentctl/issues/new?template=feature_request.yml) and say what you're trying to do; that matters more than the exact feature. Found a bug? [Report it](https://github.com/roypadina/Agentctl/issues/new?template=bug_report.yml).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Tipped on [Ko-fi](https://ko-fi.com/roypadina)? Add your Ko-fi name to the request and it goes to the front of my queue. It's a thank-you, not a purchase: no promise on what ships or when.
 
 ## More Mac apps by Roy
 
