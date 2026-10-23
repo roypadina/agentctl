@@ -55,7 +55,10 @@ See [`CLAUDE.md`](CLAUDE.md) for the full module map and conventions.
 4. Commit with a clear message and open a **Pull Request** against `main`.
 5. CI must be green and the maintainer must approve before merge.
 
-## Reporting bugs / requesting features
+## Feature requests and bugs
 
-Use the [issue templates](https://github.com/roypadina/Agentctl/issues/new/choose). For bugs,
-include your macOS + Node versions and how you launched it.
+- **Feature requests:** [open one](https://github.com/roypadina/Agentctl/issues/new?template=feature_request.yml) and say what you're trying to do; that matters more than the exact feature. Search the [open requests](https://github.com/roypadina/Agentctl/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) first and 👍 an existing one if it's there.
+- **Bugs:** use the [bug report](https://github.com/roypadina/Agentctl/issues/new?template=bug_report.yml); include your macOS + Node versions and how you launched it.
+- **Ko-fi supporters:** add your Ko-fi name to the request and it goes to the front of my queue. It's a thank-you, not a purchase: no promise on what ships or when.
+- **Bigger changes:** open an issue before the PR so we agree on the shape first. Small, focused PRs can come straight in.
+- Replies are best effort, evenings and weekends. I read everything.
