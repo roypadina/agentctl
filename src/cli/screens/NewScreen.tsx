@@ -320,7 +320,7 @@ function HelpOverlay({ ides, toolName }: { ides: Array<{ key: string; label: str
       <Row k="^n" v="new directory" />
       <Row k="^t" v="open in tmux" />
       <Row k="^p" v="git pull first" />
-      <Row k="^f" v="reveal in Finder" />
+      <Row k="^f" v="reveal in file manager" />
       {ides.map((i) => <Row key={i.key} k={`^${i.key.replace('ctrl-', '')}`} v={`open in ${i.label}`} />)}
       <Row k="esc" v="clear filter / quit" />
       <Box marginTop={1}><Text dimColor>press any key to close</Text></Box>

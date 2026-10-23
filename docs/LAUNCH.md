@@ -1,7 +1,7 @@
 # Agentctl — Launch & Promotion Notes
 
-> Launch playbook from the distribution-research workflow, on the v0.2.x command scheme
-> (`agentctl` / `agentctl`). The *actual* posting is done by the author, in their own voice.
+> Launch playbook from the distribution-research workflow, updated for v0.11.0
+> (CLI/TUI only, one `agentctl` command; npm `@roypadina/agentctl`). The *actual* posting is done by the author, in their own voice.
 > A deeper channel-by-channel breakdown lives in `docs/DISTRIBUTION.md` (kept local).
 
 **Positioning — lead with this everywhere:** *"Never lose a Claude Code / Codex session again — fuzzy-search and resume any past session with transcript preview, plus a frecency-sorted launcher for new ones."* The **resume-with-transcript-preview** hook is the novel part. Do **not** lead with "menu/launcher" (HN will say "just use tmux").
@@ -19,8 +19,8 @@ A **10–20s demo GIF** at the top of the README: New picker (fuzzy filter) → 
 - [x] **Working tap**.
 - [ ] **Pre-written objection answers** (tmux / `claude --resume`; "phones home?" → local-only MIT; macOS-only).
 
-**Eligibility timers (repo created 2026-06-05, 0 stars):**
-- **awesome-claude-code**: the issue-form's only hard gate is **repo ≥1 week old** (first commit 2026-06-05 → eligible **2026-06-12**) + no other open issue from you in that repo. No star minimum in the form itself (stars only help the maintainer's discretionary review). Web issue form ONLY; NEVER a PR/`gh` — auto-ban. Pre-filled answers ready in `docs/awesome-claude-code-submission.md`.
+**Eligibility timers (repo created 2026-06-05; check current stars):**
+- **awesome-claude-code**: the issue-form's only hard gate is **repo ≥1 week old** (first commit 2026-06-05, now eligible) + no other open issue from you in that repo. No star minimum in the form itself (stars only help the maintainer's discretionary review). Web issue form ONLY; NEVER a PR/`gh` — auto-ban. Pre-filled answers ready in `docs/awesome-claude-code-submission.md`.
 - **AlternativeTo**: create an account **now** (blocks new accounts from creating pages ~1 week).
 - **awesome-cli-apps**: blocked until 90 days + >20 stars — later.
 
@@ -39,7 +39,7 @@ Tiers: **T1** Show HN · r/ClaudeCode · awesome-claude-code · Terminal Trove �
 
 ---
 
-## Ready-to-post copy (v0.2.0 commands)
+## Ready-to-post copy (v0.11.0 commands)
 
 ### Show HN
 **Title:** `Show HN: Agentctl – Start and resume Claude Code / Codex sessions from one menu (macOS)`
@@ -61,7 +61,7 @@ MIT, runs fully local — reads your local session files, nothing leaves your ma
 
   brew install --cask roypadina/tap/agentctl
 
-Repo + demo (GIF in the README): https://github.com/roypadina/Agentctl
+Repo + demo (GIF in the README): https://github.com/roypadina/agentctl
 
 Most want feedback on: (1) is the transcript-preview-on-resume enough to identify a session?
 (2) Linux/Windows interest — the TUI is Node/ink so it's portable in principle. Happy to answer anything.
@@ -87,7 +87,7 @@ Terminal TUI (agentctl). Handles Claude Code and Codex.
 [GIF: new-session picker → fuzzy-resume with transcript preview]
 
 Runs fully local. Install:  brew install --cask roypadina/tap/agentctl
-Repo: https://github.com/roypadina/Agentctl
+Repo: https://github.com/roypadina/agentctl
 
 How do you all juggle multiple agent sessions today — tmux, separate terminals, `claude --resume`
 and hope? Want to know if transcript-preview resume is the right solve.
@@ -109,7 +109,7 @@ in your IDE / tmux / with a git pull. Claude Code AND Codex.
 4/ A terminal TUI (agentctl).
 
 5/ macOS, one line:  brew install --cask roypadina/tap/agentctl
-Repo + demo: github.com/roypadina/Agentctl
+Repo + demo: github.com/roypadina/agentctl
 Building in public, solo, no budget — feedback welcome 🙏 #ClaudeCode #buildinpublic
 ```
 

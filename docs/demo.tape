@@ -1,4 +1,4 @@
-# Demo GIF for Agentctl — render with:  bash docs/demo-fixture.sh && vhs docs/demo.tape
+# Demo GIF for agentctl — render with:  bash docs/demo-fixture.sh && vhs docs/demo.tape
 # Records against a throwaway fake dataset (docs/demo-fixture.sh) — never real ~/.claude data.
 Output docs/demo.gif
 
@@ -29,7 +29,11 @@ Sleep 400ms
 
 # ⇥ to Resume — fuzzy-search a past session, peek the transcript
 Tab
-Sleep 1.8s
+Sleep 2.5s
+Down
+Sleep 1.5s
+Screenshot docs/screenshots/resume.png
+Sleep 500ms
 Type "/"
 Sleep 300ms
 Type "auth"
@@ -37,7 +41,9 @@ Sleep 600ms
 Enter
 Sleep 1.3s
 Type "p"
-Sleep 2.8s
+Sleep 3.5s
+Screenshot docs/screenshots/peek.png
+Sleep 500ms
 Escape
 Sleep 700ms
 Type "q"

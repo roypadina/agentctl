@@ -80,7 +80,7 @@ export function planLaunch(req: LaunchRequest): LaunchPlan {
         kind: 'detached',
         requiresTeardown: false,
         returnsToTui: true,
-        steps: [{ command: 'open "$dir"', cwd: dir, stdio: 'ignore', detached: true }],
+        steps: [{ command: `${process.platform === 'darwin' ? 'open' : 'xdg-open'} "$dir"`, cwd: dir, stdio: 'ignore', detached: true }],
       };
 
     case 'ctrl-p': // git pull then launch

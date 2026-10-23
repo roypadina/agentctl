@@ -3,6 +3,19 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.11.1] — 2026-10-23
+
+### Added
+
+- npm package `@roypadina/agentctl` (`npm i -g @roypadina/agentctl`); Node 18+, macOS tested, Linux best-effort.
+- Ubuntu CI leg (non-blocking).
+- Real terminal screenshots (rendered from a fake demo dataset) in the README.
+
+### Changed
+
+- `^f` opens the folder with `xdg-open` on Linux (`open` on macOS).
+- README rename leftovers fixed; repo URLs lowercased; security reports go through GitHub private vulnerability reporting.
+
 ## [0.11.0] — 2026-10-23
 
 ### Removed — BREAKING

@@ -42,7 +42,7 @@ describe('planLaunch', () => {
     expect(p.returnsToTui).toBe(true);
     expect(p.requiresTeardown).toBe(false);
     expect(p.steps).toHaveLength(1);
-    expect(p.steps[0].command).toBe('open "$dir"');
+    expect(p.steps[0].command).toBe(`${process.platform === 'darwin' ? 'open' : 'xdg-open'} "$dir"`);
   });
 
   it('ctrl-t outside tmux → attached new-session', () => {

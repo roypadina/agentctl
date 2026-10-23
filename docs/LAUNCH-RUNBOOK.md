@@ -3,7 +3,7 @@
 Anchor day: **Thu 2026-06-12** (repo is >1 week old → awesome-claude-code eligible; concentrate the star burst for Changelog Nightly trending). Post **one channel at a time**, stay and reply, and **NEVER ask for upvotes**.
 
 Reusable bits:
-- Repo: `https://github.com/roypadina/Agentctl`
+- Repo: `https://github.com/roypadina/agentctl`
 - Install: `brew install --cask roypadina/tap/agentctl`
 - Demo GIF (TUI): `docs/demo.gif` (upload where an image is allowed)
 
@@ -13,7 +13,7 @@ Reusable bits:
 
 ## Pre-flight (morning of, ~10 min)
 - [ ] Logged into HN (`roypadina`), Reddit, X — all on stable, non-project-named accounts.
-- [ ] Social preview uploaded (done) — confirm `https://github.com/roypadina/Agentctl` unfurls a card.
+- [ ] Social preview uploaded (done) — confirm `https://github.com/roypadina/agentctl` unfurls a card.
 - [ ] `docs/demo.gif` open in a Finder window, ready to drag-drop.
 - [ ] README looks right on github.com (hero GIF autoplays).
 - [ ] You have **no other open issue** in `hesreallyhim/awesome-claude-code` (needed for the form).
@@ -28,7 +28,7 @@ Reusable bits:
 ```
 Show HN: Agentctl – Start and resume Claude Code / Codex sessions from one menu (macOS)
 ```
-- **URL field:** `https://github.com/roypadina/Agentctl`
+- **URL field:** `https://github.com/roypadina/agentctl`
 - **Text field:** leave blank.
 - **Immediately post this as the first comment:**
 ```
@@ -47,7 +47,7 @@ MIT, runs fully local — reads your local session files, nothing leaves your ma
 
   brew install --cask roypadina/tap/agentctl
 
-Repo + demo: https://github.com/roypadina/Agentctl
+Repo + demo: https://github.com/roypadina/agentctl
 
 Most want feedback on: (1) is the transcript-preview-on-resume enough to identify a session?
 (2) Linux/Windows interest — the TUI is Node/ink so it's portable in principle. Happy to answer anything.
@@ -79,7 +79,7 @@ Terminal TUI (agentctl). Handles Claude Code and Codex.
 [drag in docs/demo.gif here]
 
 Runs fully local. Install:  brew install --cask roypadina/tap/agentctl
-Repo: https://github.com/roypadina/Agentctl
+Repo: https://github.com/roypadina/agentctl
 
 How do you all juggle multiple agent sessions today — tmux, separate terminals, `claude --resume`
 and hope? Want to know if transcript-preview resume is the right solve.
@@ -102,7 +102,7 @@ in your IDE / tmux / with a git pull. Claude Code AND Codex.
 4/ A terminal TUI (agentctl).
 
 5/ macOS, one line:  brew install --cask roypadina/tap/agentctl
-Repo + demo: github.com/roypadina/Agentctl
+Repo + demo: github.com/roypadina/agentctl
 Building in public, solo, no budget — feedback welcome 🙏 #ClaudeCode #buildinpublic
 ```
 
@@ -136,7 +136,7 @@ search), and various parallel-agent runners. This one's angle is fuzzy *transcri
 the exact past session, plus the frecency launcher.
 
 Note: parts of the codebase were written with AI assistance.
-Repo (direct): https://github.com/roypadina/Agentctl
+Repo (direct): https://github.com/roypadina/agentctl
 Install: brew install --cask roypadina/tap/agentctl
 ```
 
@@ -165,7 +165,7 @@ The other half fuzzy-searches and resumes your past sessions by transcript text.
 [attach a GIF of launch → tmux]
 
 Install: brew install --cask roypadina/tap/agentctl
-Repo: https://github.com/roypadina/Agentctl
+Repo: https://github.com/roypadina/agentctl
 ```
 **dev.to:** https://dev.to/new → tags `#showdev #cli #ai #macos` (max 4)
 - **Title:** `Show DEV: Agentctl — fuzzy-resume your Claude Code & Codex sessions by transcript text`
@@ -195,7 +195,7 @@ or fuzzy-searches your past sessions by transcript text and resumes the right on
 Terminal TUI (agentctl).
 
 Install: brew install --cask roypadina/tap/agentctl
-Repo: https://github.com/roypadina/Agentctl
+Repo: https://github.com/roypadina/agentctl
 ```
 
 ---
