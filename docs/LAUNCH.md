@@ -11,13 +11,12 @@ A **10–20s demo GIF** at the top of the README: New picker (fuzzy filter) → 
 
 ## Pre-launch checklist
 - [ ] **Demo GIF** (`docs/demo.gif`, VHS `demo.tape`, fake data) — autoplays on GitHub/awesome-lists. (asciinema `<script>` embeds render as nothing on GitHub — must be a GIF.)
-- [x] **Menu-bar GUI clip** → `docs/gui-demo.gif` (New launcher → Resume + transcript peek → Settings; built from the same fake `/private/tmp/acmdemo` dataset, not real `~/.claude`). Now the lead image in the README Screenshots section.
 - [ ] **README** stays landing-page shaped (H1 → GIF → badges → 1-line install → pain bullets). ✅ mostly done.
 - [x] **Social-preview/OG image** built → `docs/social-preview.png` (1280×640). ⚠️ Still **upload via repo Settings → General → Social preview (web UI only, no API)** before sharing (X/Slack cache unfurls). Verify with X Card Validator.
-- [x] **Topics** (claude-code, codex, coding-agent, ai-agent, session-manager, cli, tui, terminal, macos, menu-bar, swiftui, homebrew, developer-tools) + keyword About line.
+- [x] **Topics** (claude-code, codex, coding-agent, ai-agent, session-manager, cli, tui, terminal, macos, homebrew, developer-tools) + keyword About line.
 - [x] **FUNDING.yml** (ko_fi: roypadina).
 - [ ] Pinned **"good first issue"**.
-- [x] **Working tap + Gatekeeper note**.
+- [x] **Working tap**.
 - [ ] **Pre-written objection answers** (tmux / `claude --resume`; "phones home?" → local-only MIT; macOS-only).
 
 **Eligibility timers (repo created 2026-06-05, 0 stars):**
@@ -31,12 +30,12 @@ A **10–20s demo GIF** at the top of the README: New picker (fuzzy filter) → 
 | T-7..T-2 | — | build assets; email Console.dev (`hello@console.dev`); warm Reddit/HN accounts |
 | Day 1 (Tue/Wed) | 9–11am ET | **Show HN** (anchor) + **r/ClaudeCode** AM; tweet the **repo** (never the HN thread) |
 | Day 2 | AM | **r/commandline** (TUI framing) |
-| Day 3 | AM | **r/macapps** (GUI framing) + open **Terminal Trove** submission |
-| Day 4 | — | **DevHunt** + **awesome-tuis** PR + **MacMenuBar** form |
+| Day 3 | AM | open **Terminal Trove** submission |
+| Day 4 | — | **DevHunt** + **awesome-tuis** PR |
 | Day 5–6 | AM | **r/ClaudeAI** (broader) + **dev.to** "How I built" |
 | Day 7+ | ≥5 stars | **awesome-claude-code** issue form + **AlternativeTo** |
 
-Tiers: **T1** Show HN · r/ClaudeCode · awesome-claude-code · Terminal Trove · tap. **T2** r/commandline · r/macapps · DevHunt · dev.to · r/ClaudeAI · awesome-tuis · Console.dev. **T3** GitHub Trending (effect of T1–3 velocity) · MacMenuBar · AlternativeTo · X/Fosstodon build-in-public · Anthropic Discord #show-and-tell. **Skip:** r/programming, Product Hunt, MCP/plugin marketplaces (off-category).
+Tiers: **T1** Show HN · r/ClaudeCode · awesome-claude-code · Terminal Trove · tap. **T2** r/commandline · DevHunt · dev.to · r/ClaudeAI · awesome-tuis · Console.dev. **T3** GitHub Trending (effect of T1–3 velocity) · AlternativeTo · X/Fosstodon build-in-public · Anthropic Discord #show-and-tell. **Skip:** r/programming, Product Hunt, MCP/plugin marketplaces (off-category).
 
 ---
 
@@ -56,7 +55,7 @@ and frecency-sorted with a fuzzy filter, one keypress to launch in your IDE / tm
 pull — and (b) fuzzy-search *past* Claude Code sessions and resume them, with a transcript preview
 so you can see which conversation it is before jumping back in. Works for Claude Code and Codex.
 
-It ships as both a terminal TUI (agentctl, alias agentctl) and a native SwiftUI menu-bar app.
+It ships as a terminal TUI (agentctl).
 
 MIT, runs fully local — reads your local session files, nothing leaves your machine. No signup.
 
@@ -69,7 +68,7 @@ Most want feedback on: (1) is the transcript-preview-on-resume enough to identif
 ```
 
 ### Reddit — r/ClaudeCode
-**Title:** `I kept losing track of which Claude Code session was which, so I built a one-key launcher + fuzzy session-resumer (TUI + macOS menu bar, MIT)`
+**Title:** `I kept losing track of which Claude Code session was which, so I built a one-key launcher + fuzzy session-resumer (TUI, MIT)`
 ```
 Full disclosure: I'm the solo dev, this is free and MIT.
 
@@ -83,10 +82,9 @@ So I built Agentctl. Two things:
 2. RESUME a past Claude Code session — fuzzy-search across past sessions with a transcript preview,
    so you see which conversation it is before resuming. This is the part I use constantly.
 
-Terminal TUI (agentctl / agentctl) *and* a native menu-bar app. Handles Claude Code and Codex.
+Terminal TUI (agentctl). Handles Claude Code and Codex.
 
 [GIF: new-session picker → fuzzy-resume with transcript preview]
-[GIF: menu-bar dropdown]
 
 Runs fully local. Install:  brew install --cask roypadina/tap/agentctl
 Repo: https://github.com/roypadina/Agentctl
@@ -108,7 +106,7 @@ Most tools spin up new parallel sessions. This finds the one you already had.
 3/ New sessions too: project dirs grouped + frecency-sorted, fuzzy-filter, one keypress to launch
 in your IDE / tmux / with a git pull. Claude Code AND Codex.
 
-4/ Two ways: terminal TUI (agentctl / agentctl) + native SwiftUI menu-bar app. [menu-bar GIF]
+4/ A terminal TUI (agentctl).
 
 5/ macOS, one line:  brew install --cask roypadina/tap/agentctl
 Repo + demo: github.com/roypadina/Agentctl

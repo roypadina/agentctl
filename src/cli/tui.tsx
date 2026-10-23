@@ -338,7 +338,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
       if (confirmDeleteId) { setConfirmDeleteId(null); return; }
       if (marked.size > 0) { setMarked(new Set()); return; }
       if (confirmResumeId) { setConfirmResumeId(null); return; }
-      if (filter) { setFilter(''); setCursor(0); return; } // clear filter first (matches New + GUI)
+      if (filter) { setFilter(''); setCursor(0); return; } // clear filter first (matches New)
       back();
       return;
     }

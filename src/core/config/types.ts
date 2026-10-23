@@ -37,22 +37,12 @@ export interface ThemeConfig {
   statusInactive: string;
 }
 
-export interface GuiConfig {
-  /** terminal kind: "Terminal" | "iTerm" | "cmux" | "custom" | …  Consumed only by the Mac GUI. */
-  terminal: string;
-  /** for terminal = "custom": a shell template with {{cmd}} substituted. */
-  launchCommand?: string;
-  /** global shortcut to open the GUI window, e.g. "cmd+shift+m" (Mac GUI only). */
-  hotkey?: string;
-}
-
 export interface AgentctlConfig {
   groups: GroupConfig[];
   tools: ToolConfig[];
   ides: IdeConfig[];
   defaultTool: string;
   theme: ThemeConfig;
-  gui: GuiConfig;
 }
 
 export type ConfigWarningCode =

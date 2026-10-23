@@ -59,19 +59,6 @@ key   = "ctrl-b"
 label = "both"
 cmd   = 'code "$dir"; open -a "Rider" "$dir"'
 
-# ─── GUI / terminal ──────────────────────────────────────────────────────────
-# Which terminal the GUI opens sessions in.
-#   "default"  → the system default terminal (whatever opens .command files)
-#   an app name → "Terminal" | "iTerm" | "Ghostty" | "Warp" | "kitty" | "WezTerm" | "cmux"
-#   "custom"   → set launch_command with {{script}} (temp .command path), {{cmd}}, or {{dir}}
-[gui]
-terminal = "default"
-# launch_command = 'open -a "iTerm" {{script}}'
-
-# Global keyboard shortcut to open the GUI window (Mac GUI only).
-# Modifiers: cmd / shift / ctrl / alt (option) + one key. Empty/omitted = off.
-# hotkey = "cmd+shift+m"
-
 # ─── theme (optional) ────────────────────────────────────────────────────────
 # [theme]
 # accent = "#FF9F43"

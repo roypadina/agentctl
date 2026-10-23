@@ -38,7 +38,6 @@ const config: AgentctlConfig = {
   ides: [{ key: 'ctrl-v', label: 'code', cmd: 'code "$dir"' }],
   defaultTool: 'claude',
   theme: { accent: '#FF9F43', border: '#6C91BF', pointer: '#FF9F43', statusBusy: 'green', statusIdle: 'yellow', statusInactive: 'gray' },
-  gui: { terminal: 'Terminal' },
 };
 const dir = (name: string, group: string, color: string): ProjectDir =>
   ({ name, path: `/code/${group}/${name}`, group, groupColor: color, timeMs: 1700000000000, scoreSource: 'mtime' });

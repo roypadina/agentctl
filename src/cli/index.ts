@@ -10,7 +10,6 @@ import { renderPeek } from './peek.js';
 import { resume, ResumeError } from './resume.js';
 import { getRecap, RecapError } from '../core/recap.js';
 import { registerConfigCommands } from './config.js';
-import { registerGuiCommands } from './guiCmd.js';
 import { registerAnnotateCommands } from './annotate.js';
 import { registerHookCommands } from './hook.js';
 
@@ -64,8 +63,10 @@ Tidy the list
   hidden or deleted session still resumes if you name its id.
 
 Where things live
-  ~/.config/agentctl/config.toml           groups, tools, terminal, hotkey
+  ~/.config/agentctl/config.toml           groups, tools, IDE binds
   ~/.config/agentctl/annotations/<id>.json one small file per annotated session
+
+Support Agentctl: https://ko-fi.com/roypadina
 `)
     .action(async (opts: { resume?: boolean }) => {
       const { runApp } = await import('./router.js');
@@ -183,7 +184,6 @@ Where things live
   registerAnnotateCommands(program);
   registerHookCommands(program);
   registerConfigCommands(program);
-  registerGuiCommands(program);
   return program;
 }
 

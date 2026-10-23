@@ -105,6 +105,5 @@ function structuredCloneConfig(c: AgentctlConfig): AgentctlConfig {
     ides: c.ides.map(i => ({ ...i })),
     defaultTool: c.defaultTool,
     theme: { ...c.theme },
-    gui: { ...c.gui },
   };
 }
