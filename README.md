@@ -222,7 +222,7 @@ add one tool per profile:
 ```toml
 [[tool]]
 name  = "work"
-runs  = "CLAUDE_CONFIG_DIR=~/.claude2 claude --dangerously-skip-permissions"
+runs  = "CLAUDE_CONFIG_DIR=~/.claude2 claude --permission-mode auto"
 label = " ⚡ Work account "
 ```
 
@@ -259,7 +259,7 @@ color = "#6C91BF"
 
 [[tool]]                        # an agent launcher: `runs` is executed in the chosen dir
 name  = "claude"
-runs  = "claude --dangerously-skip-permissions"
+runs  = "claude --permission-mode auto"
 
 [[ide]]                         # an fzf-style ^key that opens an editor, then the tool
 key   = "ctrl-v"
@@ -288,9 +288,10 @@ names by walking the filesystem — and flagged when the result isn't certain.
 - **Open source (MIT).** Read or build every line yourself.
 - **Local-only. No network calls of its own, no analytics, no accounts.** It reads `~/.claude/` and the
   project folders you configure, and launches your terminal. That's it.
-- **`--dangerously-skip-permissions`.** The default tool commands include Claude's
-  `--dangerously-skip-permissions` (and Codex's sandbox-bypass) flag, because this is a launcher for your
-  own machine. You can change `runs` in your config to drop it.
+- **Permissions.** Claude sessions start and resume in Claude Code's **auto** permission mode
+  (`--permission-mode auto`). To opt into bypass, set `permission_mode = "bypassPermissions"` at the top of
+  your config (adds `--dangerously-skip-permissions` to Resume and the built-in `claude` tool). The default
+  Codex tool still uses Codex's sandbox-bypass flag; change its `runs` to drop it.
 
 ## Uninstall
 

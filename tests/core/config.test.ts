@@ -127,7 +127,24 @@ describe('getTool', () => {
     const p = cfg(`[[tool]]\nname="foo"\nruns="foo --go"\n`);
     const { config } = loadConfig({ path: p });
     expect(getTool(config, 'foo').runs).toBe('foo --go');
-    expect(getTool(config, 'claude').runs).toBe('claude --dangerously-skip-permissions');
+    expect(getTool(config, 'claude').runs).toBe('claude --permission-mode auto');
     expect(getTool(config, 'bar').runs).toBe('bar'); // synthesized
+  });
+});
+
+describe('permission_mode', () => {
+  it('defaults to auto', () => {
+    const { config } = loadConfig({ path: cfg('') });
+    expect(config.permissionMode).toBe('auto');
+  });
+  it('bypassPermissions opts in and drives the built-in claude tool', () => {
+    const { config } = loadConfig({ path: cfg('permission_mode = "bypassPermissions"\n') });
+    expect(config.permissionMode).toBe('bypassPermissions');
+    expect(getTool(config, 'claude').runs).toBe('claude --dangerously-skip-permissions');
+  });
+  it('invalid value warns and falls back to auto', () => {
+    const { config, warnings } = loadConfig({ path: cfg('permission_mode = "yolo"\n') });
+    expect(config.permissionMode).toBe('auto');
+    expect(warnings.map(w => w.code)).toContain('bad-permission-mode');
   });
 });

@@ -1,6 +1,9 @@
 import { existsSync } from 'node:fs';
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import { isPrimaryHome } from '../core/profiles.js';
+import { loadPermissionMode } from '../core/config/loadConfig.js';
+import { permissionArgs } from '../core/config/defaults.js';
+import type { PermissionMode } from '../core/config/types.js';
 import type { SessionRecord } from '../core/types.js';
 
 export class ResumeError extends Error {
@@ -23,6 +26,7 @@ export interface ResumeDeps {
     opts: { cwd: string; stdio: 'inherit'; env: NodeJS.ProcessEnv },
   ) => SpawnSyncReturns<Buffer>;
   exit?: (code: number) => never;
+  permissionMode?: () => PermissionMode;
 }
 
 /**
@@ -63,7 +67,7 @@ export function resume(
   const bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude';
   const child = spawn(
     bin,
-    ['--resume', s.id, '--dangerously-skip-permissions'],
+    ['--resume', s.id, ...permissionArgs((deps.permissionMode ?? loadPermissionMode)())],
     { cwd: targetCwd, stdio: 'inherit', env: resumeEnv(s) },
   );
   const err = child.error as NodeJS.ErrnoException | undefined;

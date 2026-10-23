@@ -3,6 +3,12 @@
 # Optional. Which tool's launcher is primary (informational).
 default_tool = "claude"
 
+# Claude Code permission mode for the built-in claude tool and for Resume.
+#   "auto" (default)        — Claude Code auto mode (--permission-mode auto)
+#   "bypassPermissions"     — opt in to --dangerously-skip-permissions
+# A [[tool]] `runs` line below is used verbatim; this key does not rewrite it.
+# permission_mode = "auto"
+
 # ─── dir groups ──────────────────────────────────────────────────────────────
 # Each group is a section in the New screen. `path` is scanned one level deep for
 # project dirs, sorted by `z` frecency (falls back to mtime). ~ and $HOME expand.
@@ -21,7 +27,7 @@ color = "#A855F7"
 # executed in the chosen dir. Adding/removing a tool takes effect in a NEW shell.
 [[tool]]
 name  = "claude"
-runs  = "claude --dangerously-skip-permissions"
+runs  = "claude --permission-mode auto"
 label = " ⚡ Projects "
 color = "#6C91BF"
 
@@ -36,7 +42,7 @@ color = "#A855F7"
 # with ⇧⇥. Resume already picks the right profile on its own.
 # [[tool]]
 # name  = "work"
-# runs  = "CLAUDE_CONFIG_DIR=~/.claude2 claude --dangerously-skip-permissions"
+# runs  = "CLAUDE_CONFIG_DIR=~/.claude2 claude --permission-mode auto"
 # label = " ⚡ Work account "
 # color = "#4EA37A"
 

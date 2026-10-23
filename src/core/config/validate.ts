@@ -1,11 +1,12 @@
 import { expandPath } from './paths.js';
-import { DEFAULT_COLOR, DEFAULT_THEME } from './defaults.js';
+import { DEFAULT_COLOR, DEFAULT_PERMISSION_MODE, DEFAULT_THEME } from './defaults.js';
 import {
   ConfigError,
   type AgentctlConfig,
   type ConfigWarning,
   type GroupConfig,
   type IdeConfig,
+  type PermissionMode,
   type ThemeConfig,
   type ToolConfig,
 } from './types.js';
@@ -135,11 +136,19 @@ export function validateConfig(
     defaultTool = tools[0].name;
   }
 
+  let permissionMode: PermissionMode = DEFAULT_PERMISSION_MODE;
+  if (raw.permission_mode === 'auto' || raw.permission_mode === 'bypassPermissions') {
+    permissionMode = raw.permission_mode;
+  } else if (raw.permission_mode !== undefined) {
+    warnings.push({ code: 'bad-permission-mode', message: `permission_mode "${String(raw.permission_mode)}" must be "auto" or "bypassPermissions" → "auto"` });
+  }
+
   const config: AgentctlConfig = {
     groups,
     tools,
     ides,
     defaultTool,
+    permissionMode,
     theme: buildTheme(raw.theme),
   };
   return { config, warnings };

@@ -3,6 +3,16 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.11.2] — 2026-10-23
+
+### Changed
+
+- Claude sessions now start and resume in Claude Code's **auto** permission mode (`--permission-mode auto`) instead of `--dangerously-skip-permissions`.
+
+### Added
+
+- Config key `permission_mode = "bypassPermissions"` opts back in to `--dangerously-skip-permissions` (Resume and the built-in `claude` tool).
+
 ## [0.11.1] — 2026-10-23
 
 ### Added

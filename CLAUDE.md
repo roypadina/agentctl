@@ -64,7 +64,7 @@ bin/agentctl                  Node shebang shim → dist/cli.js
 - **No defensive code at boundaries that aren't boundaries**. Internal calls trust each other. Validate only at FS reads / external JSON / process.argv.
 - **TDD where it helps**. New `src/core/` modules ship with `tests/core/<name>.test.ts`. UI work in `tui.tsx` gets smoke tests only — full UX validation is manual in a real terminal.
 - **Cwd encoding is ambiguous**. `~/.claude/projects/<encoded-cwd>/` uses `-` as both the leading marker and the path separator. Real `-` in segment names (e.g. `My-App-Repo`) collides. `decode.ts` recursively walks candidates with `existsSync` pruning. When no match, returns `cwdDecodeConfident: false` — UI must surface this and `resume` refuses without `--cwd <override>`.
-- **`--dangerously-skip-permissions` is hardcoded** into `cli/resume.ts`. Never expose a config flag to remove it. Only `resume` adds it; `peek` / read paths never do.
+- **Permission mode comes from config `permission_mode`** (`auto` default → `--permission-mode auto`; `bypassPermissions` opt-in → `--dangerously-skip-permissions`), via `permissionArgs` in `core/config/defaults.ts`. Only `resume` adds it; `peek` / read paths never do.
 - **Resume pins `CLAUDE_CONFIG_DIR`** to the session's own profile (`resumeEnv`). Inheriting the
   ambient value resumes the transcript under whichever profile launched the menu; when two
   profiles share a `projects/` dir that *succeeds silently as the wrong account* rather than

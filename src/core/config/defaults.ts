@@ -1,13 +1,22 @@
-import type { AgentctlConfig, ThemeConfig, ToolConfig } from './types.js';
+import type { AgentctlConfig, PermissionMode, ThemeConfig, ToolConfig } from './types.js';
 
 /** Hex colour fallback. */
 export const DEFAULT_COLOR = '#8888aa';
 
+export const DEFAULT_PERMISSION_MODE: PermissionMode = 'auto';
+
+/** CLI args that start Claude Code in the given permission mode. */
+export function permissionArgs(mode: PermissionMode): string[] {
+  return mode === 'bypassPermissions' ? ['--dangerously-skip-permissions'] : ['--permission-mode', 'auto'];
+}
+
 /** Built-in tools. Used when config omits a [[tool]] of this name. */
-export const DEFAULT_TOOLS: Record<string, ToolConfig> = {
-  claude: { name: 'claude', runs: 'claude --dangerously-skip-permissions', label: ' ⚡ Projects ', color: '#6C91BF' },
-  cdx: { name: 'cdx', runs: 'codex --dangerously-bypass-approvals-and-sandbox', label: ' ✦ Codex ', color: '#A855F7' },
-};
+export function defaultTools(mode: PermissionMode = DEFAULT_PERMISSION_MODE): Record<string, ToolConfig> {
+  return {
+    claude: { name: 'claude', runs: ['claude', ...permissionArgs(mode)].join(' '), label: ' ⚡ Projects ', color: '#6C91BF' },
+    cdx: { name: 'cdx', runs: 'codex --dangerously-bypass-approvals-and-sandbox', label: ' ✦ Codex ', color: '#A855F7' },
+  };
+}
 
 /** Colors duplicated (NOT imported) from tui.tsx to keep core ink-free. */
 export const DEFAULT_THEME: ThemeConfig = {
@@ -24,8 +33,9 @@ export const DEFAULT_RESERVED_KEYS = new Set(['enter', 'ctrl-f', 'ctrl-p', 'ctrl
 
 export const DEFAULT_CONFIG: AgentctlConfig = {
   groups: [],
-  tools: [DEFAULT_TOOLS.claude, DEFAULT_TOOLS.cdx],
+  tools: Object.values(defaultTools()),
   ides: [],
   defaultTool: 'claude',
+  permissionMode: DEFAULT_PERMISSION_MODE,
   theme: DEFAULT_THEME,
 };

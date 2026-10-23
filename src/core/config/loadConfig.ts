@@ -2,11 +2,12 @@ import { readFileSync, statSync } from 'node:fs';
 import { parse, TomlError } from 'smol-toml';
 import { configPath } from './paths.js';
 import { validateConfig } from './validate.js';
-import { DEFAULT_CONFIG, DEFAULT_RESERVED_KEYS, DEFAULT_TOOLS, DEFAULT_COLOR } from './defaults.js';
+import { DEFAULT_CONFIG, DEFAULT_RESERVED_KEYS, DEFAULT_PERMISSION_MODE, defaultTools, DEFAULT_COLOR } from './defaults.js';
 import {
   ConfigError,
   type AgentctlConfig,
   type LoadConfigResult,
+  type PermissionMode,
   type ToolConfig,
 } from './types.js';
 
@@ -75,7 +76,7 @@ export function loadConfig(opts: LoadConfigOptions = {}): LoadConfigResult {
   const { config, warnings } = validateConfig(raw, { reservedKeys });
   // Always guarantee claude/cdx exist as launchers.
   if (config.tools.length === 0) {
-    config.tools = [DEFAULT_TOOLS.claude, DEFAULT_TOOLS.cdx];
+    config.tools = Object.values(defaultTools(config.permissionMode));
   }
 
   const result: LoadConfigResult = {
@@ -94,7 +95,8 @@ export function loadConfig(opts: LoadConfigOptions = {}): LoadConfigResult {
 export function getTool(config: AgentctlConfig, name: string): ToolConfig {
   const found = config.tools.find(t => t.name === name);
   if (found) return found;
-  if (DEFAULT_TOOLS[name]) return DEFAULT_TOOLS[name];
+  const builtin = defaultTools(config.permissionMode)[name];
+  if (builtin) return builtin;
   return { name, runs: name, label: ` ${name} `, color: DEFAULT_COLOR };
 }
 
@@ -104,6 +106,12 @@ function structuredCloneConfig(c: AgentctlConfig): AgentctlConfig {
     tools: c.tools.map(t => ({ ...t })),
     ides: c.ides.map(i => ({ ...i })),
     defaultTool: c.defaultTool,
+    permissionMode: c.permissionMode,
     theme: { ...c.theme },
   };
+}
+
+/** Permission mode for resume paths. A broken config must not block resuming → safe default. */
+export function loadPermissionMode(): PermissionMode {
+  try { return loadConfig().config.permissionMode; } catch { return DEFAULT_PERMISSION_MODE; }
 }
