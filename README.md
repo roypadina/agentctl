@@ -17,6 +17,7 @@ your terminal as **`agentctl`**.
 [![Homebrew](https://img.shields.io/badge/brew-roypadina%2Ftap-FBB040?logo=homebrew&logoColor=white)](https://github.com/roypadina/homebrew-tap)
 [![Release](https://img.shields.io/github/v/release/roypadina/agentctl?logo=github&label=release)](https://github.com/roypadina/agentctl/releases/latest)
 [![CI](https://github.com/roypadina/agentctl/actions/workflows/ci.yml/badge.svg)](https://github.com/roypadina/agentctl/actions/workflows/ci.yml)
+[![Website](https://img.shields.io/badge/website-apps.roypadina-2F62E6)](https://apps.roypadina.synology.me/apps/agentctl/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-F16061?logo=ko-fi&logoColor=white)](https://ko-fi.com/roypadina)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?logo=github)](CONTRIBUTING.md)
@@ -309,6 +310,14 @@ PRs welcome! `main` is protected — fork, branch, add tests, and open a PR. See
 ```bash
 npm test && npm run typecheck && npm run build   # the whole check
 ```
+
+## More Mac apps by Roy
+
+Free, open-source Mac menu-bar apps and terminal tools, all on one site: **[apps.roypadina.synology.me](https://apps.roypadina.synology.me/)**.
+
+- [Agents Monitor](https://apps.roypadina.synology.me/apps/agents-monitor/) — See your Claude Code and Codex usage limits before you hit them.
+- [AgentsSessionHopper](https://apps.roypadina.synology.me/apps/agents-session-hopper/) — Profiles for Claude Code. One conversation, any of your accounts.
+- [claude-jam](https://apps.roypadina.synology.me/apps/claude-jam/) — Share one real Claude Code session with other humans.
 
 ## Support
 
