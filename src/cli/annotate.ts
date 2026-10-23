@@ -178,8 +178,8 @@ list arrives as one argument.
 Like \`hide\`, but out of every list the menu can show — which is what makes it
 safe to press. Also just a listing preference: nothing is removed from ~/.claude
 and the session still resumes by id.
-Recover with \`agentctl delete --undo <id>\`, \`agentctl ls --deleted\` to find it,
-or the menu-bar app's Deleted view. Deliberately not reachable from the menu.
+Recover with \`agentctl delete --undo <id>\`; \`agentctl ls --deleted\` finds it.
+Deliberately not reachable from the menu.
 `)
     .action(async (ids: string[], opts) => {
       await applyMany(ids, opts.session, { deleted: !opts.undo }, opts.json);

@@ -63,8 +63,10 @@ Tidy the list
   hidden or deleted session still resumes if you name its id.
 
 Where things live
-  ~/.config/agentctl/config.toml           groups, tools, terminal, hotkey
+  ~/.config/agentctl/config.toml           groups, tools, IDE binds
   ~/.config/agentctl/annotations/<id>.json one small file per annotated session
+
+Support Agentctl: https://ko-fi.com/roypadina
 `)
     .action(async (opts: { resume?: boolean }) => {
       const { runApp } = await import('./router.js');
