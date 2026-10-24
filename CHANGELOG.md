@@ -62,6 +62,98 @@ All notable changes to Agentctl are documented here. Format loosely follows
   and every fallback to the previous environment variable names (config path, home, Claude binary,
   recap model), are gone. Only `AGENTCTL_*` variables and `~/.config/agentctl` are read.
 
+## [0.9.7] — 2026-10-03
+
+### Changed
+
+- Custom About window (no clipped credits) and a compact About row in Settings.
+
+## [0.9.6] — 2026-10-03
+
+### Added
+
+- About section and menu items (About Agentctl, Support on Ko-fi).
+
+## [0.9.5] — 2026-09-28
+
+### Changed
+
+- The due-reminder nudge names each session with a due reminder and prints its resume command
+  (`agentctl resume <id>`).
+
+## [0.9.4] — 2026-09-22
+
+### Added
+
+- App icon (violet terminal chevron with session rows). The app previously shipped without one.
+
+## [0.9.3] — 2026-08-31
+
+### Changed
+
+- **Hide** and **Delete** are two buttons again (flipping to **Unhide** / **Restore**), with the
+  current shelf shown beside them when it is not the default.
+- **`⌘X` deletes**, matching the terminal menu's `x`. `⌘⌫` still works.
+
+## [0.9.2] — 2026-08-31
+
+### Fixed
+
+- **0.9.1 could not run `agentctl` at all** (`env: node: No such file or directory`). The app now
+  builds the child's `PATH` from where node actually lives (Homebrew, `/usr/local`, `~/.local/bin`,
+  nvm versions) instead of sourcing the login profile, and looks for the CLI inside its own bundle
+  first.
+
+## [0.9.1] — 2026-08-30
+
+### Added
+
+- **Multi-select** in the app: `⌘M` marks and moves down, `⇧⌘M` or `esc` clears; done, hide and
+  delete act on every marked session.
+
+### Fixed
+
+- **The app's keyboard shortcuts never ran** (the view never learned its window). They work now.
+- Hide and delete are findable: the shelf control reads **Hide or delete** and lists its shortcuts.
+
+## [0.9.0] — 2026-08-29
+
+### Added
+
+- **The app has the terminal menu's keyboard**: same letters with ⌘ (`⌘E` name, `⌘L` labels,
+  `⌘T` remind, `⌘U` due, `⌘D` done, `⇧⌘H` hide, `⌘⌫` delete, `⌘R` recap, `⇧⌘C` copy resume
+  command, `⌘,` settings); `⌘/` lists them all.
+- Sessions show the working directory and branch read from the transcript; rows gained the
+  terminal menu's glyphs and an age column.
+
+### Changed
+
+- Action controls rebuilt: **Done** checkbox, **Remind** / **Due** menus labelled with their value,
+  and a **Listed / Hidden / Deleted** shelf picker. The details pane becomes a bottom drawer in
+  narrow windows, so no control is clipped any more.
+- `agentctl --help` and the terminal menu's `?` screen explain each feature.
+
+### Fixed
+
+- **A repeated `⌘⌫` could delete sessions you never selected** — the selection now follows the
+  session by id.
+- A failed Settings save looked like a success and discarded every edit.
+- A rename made in the terminal menu could be overwritten by the app.
+- Errors showed "exit 4" without the explanation; heavy stderr output could hang the app.
+
+## [0.8.0] — 2026-08-29
+
+### Added
+
+- **Tool runs vs. interactive sessions.** Every session has a kind (`interactive` / `tool`) read
+  from the transcript. `agentctl ls` gets a `▸` column and `--tool` / `--interactive` filters; the
+  menu gets `T` to cycle the filter; the app gets a badge and list filters.
+
+### Fixed
+
+- Sessions under dot-directories (`.worktrees`, `.claude-worktrees`) were always flagged
+  "cwd uncertain". The decoder now walks the real filesystem — exact and much faster.
+
 ## [0.7.0] — 2026-08-29
 
 ### Fixed
