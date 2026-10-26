@@ -1,0 +1,4 @@
+{"type":"user","message":{"content":"see ~/ClaudWork/2026-01-01-from-memory/x.md"},"timestamp":1700000000000}
+{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Write","input":{"file_path":"/Users/me/ClaudWork/2026-02-02-real-task/out.html"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"ls ~/ClaudWork/2026-02-02-real-task/ ~/ClaudWork/2026-03-03-passing"}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"cp a ~/ClaudWork/.. ; cp b ~/ClaudWork/.. ; cp c ~/ClaudWork/.."}}]}}

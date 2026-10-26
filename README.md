@@ -151,6 +151,8 @@ Annotate the highlighted session in place: `e` name · `n` note · `l` labels ·
 `u` due date · `d` done. `c` copies a resume command, `h` hides a session, `x` deletes it (twice),
 `v` shows the hidden ones, `H` shows/hides done ones, `T` filters tool runs. (`l` pre-fills the issue
 key from the branch.)
+`o` sorts by the next column (last used · name · status · branch · work · cwd), `O` reverses it. The
+**WORK** column shows the `~/ClaudWork/<folder>` a session worked in.
 
 `space` marks sessions — `h`, `x` and `d` then act on every marked one at once, and the cursor stays
 where it was instead of jumping back to the top.

@@ -7,6 +7,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const fixtures = join(here, '..', 'fixtures', 'transcripts');
 
 describe('scanJsonl', () => {
+  it('workDirName = the ClaudWork folder the assistant names most, ignoring user text', async () => {
+    const r = await scanJsonl(join(fixtures, 'claudwork.jsonl'));
+    expect(r.workDirName).toBe('2026-02-02-real-task');
+    expect((await scanJsonl(join(fixtures, 'simple.jsonl'))).workDirName).toBeNull();
+  });
+
   it('returns first user prompt and first timestamp', async () => {
     const r = await scanJsonl(join(fixtures, 'simple.jsonl'));
     expect(r.firstPrompt).toBe('hello world');

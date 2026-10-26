@@ -26,7 +26,7 @@ src/core/                 zero ink/react imports — pure data
   paths.ts                claudeHome / projectsDir / sessionsDir (honors AGENTCTL_HOME);
                           claudeHomes / projectsDirs / sessionsDirs = all ~/.claude* profiles
   decode.ts               encoded-cwd → cwd, FS-verified recursive pruned search
-  jsonlScan.ts            streaming scan: first prompt, custom-title, ai-title, first ts
+  jsonlScan.ts            streaming scan: first prompt, custom-title, ai-title, first ts, ClaudWork folder
   liveState.ts            ~/.claude/sessions/<pid>.json + kill -0 + ps comm check
   git.ts                  read .git/HEAD (or gitdir-file) → branch / short SHA
   search.ts               async generator full-text search across all sessions
