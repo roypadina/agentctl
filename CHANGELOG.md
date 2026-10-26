@@ -3,6 +3,13 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.12.0] — 2026-10-26
+
+### Added
+
+- Resume: `o` sorts the list by the next column (last used · name · status · branch · work · cwd), `O` reverses it; the header marks the sorted column (▼ natural order, ▲ reversed).
+- Resume: **WORK** column — the `~/ClaudWork/<folder>` a session worked in (the folder its own tool calls name most), shown on terminals ≥ 100 columns; `/` filters on it too.
+
 ## [0.11.2] — 2026-10-23
 
 ### Changed

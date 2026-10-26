@@ -20,7 +20,16 @@ export interface ScanResult {
    * project directory name only ever encodes where `claude` was launched.
    */
   lastCwd: string | null;
+  /**
+   * The `~/ClaudWork/<folder>` this session worked in: the folder its own tool calls name most.
+   * Bash `cd` never sticks in Claude Code, so `lastCwd` stays the launch dir for ad-hoc work.
+   */
+  workDirName: string | null;
 }
+
+// Assistant records hold only the model's text and tool inputs, so a ClaudWork path there is
+// one it chose to work in — not one quoted back from a memory file or a system reminder.
+const WORK_DIR_RE = /ClaudWork\/(\w[\w.-]*)/g; // \w first: never `.` or `..`
 
 /** Anything that is not the interactive CLI was driven by a tool, not typed by a human. */
 export function kindOf(entrypoint: string | null | undefined): SessionKind {
@@ -105,6 +114,7 @@ export async function scanJsonl(path: string): Promise<ScanResult> {
   let corruptLines = 0;
   let entrypoint: string | null = null;
   let lastCwd: string | null = null;
+  const workDirHits = new Map<string, number>();
   try {
     for await (const line of rl) {
       if (!line) continue;
@@ -135,9 +145,15 @@ export async function scanJsonl(path: string): Promise<ScanResult> {
         entrypoint = o.entrypoint;
       }
       if (typeof o.cwd === 'string' && o.cwd) lastCwd = o.cwd;
+      if (o.type === 'assistant' && line.includes('ClaudWork/')) {
+        for (const m of line.matchAll(WORK_DIR_RE)) workDirHits.set(m[1], (workDirHits.get(m[1]) ?? 0) + 1);
+      }
     }
   } finally {
     stream.destroy();
   }
-  return { firstPrompt, customTitle, aiTitle, firstTimestamp, corruptLines, entrypoint, lastCwd };
+  let workDirName: string | null = null;
+  let best = 0;
+  for (const [name, n] of workDirHits) if (n > best) { best = n; workDirName = name; }
+  return { firstPrompt, customTitle, aiTitle, firstTimestamp, corruptLines, entrypoint, lastCwd, workDirName };
 }

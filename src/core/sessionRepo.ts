@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { projectsDirs } from './paths.js';
 import { decodeCwd } from './decode.js';
@@ -55,6 +56,38 @@ export async function listSessions(opts: ListOptions = {}): Promise<SessionRecor
   return opts.limit ? out.slice(0, opts.limit) : out;
 }
 
+export type SortColumn = 'used' | 'name' | 'status' | 'branch' | 'work' | 'cwd';
+/** Order `o` cycles through in the TUI; the first is the default. */
+export const SORT_COLUMNS: SortColumn[] = ['used', 'name', 'status', 'branch', 'work', 'cwd'];
+
+const STATUS_RANK = { busy: 0, idle: 1, inactive: 2 } as const;
+
+/**
+ * Sort by one column. Natural order (`desc` false): newest first for `used`, busy → idle →
+ * inactive for `status`, A→Z for the text columns; `desc` flips it. Rows without a value
+ * (no branch, no work folder) always sink to the bottom. Ties keep the incoming order.
+ */
+export function sortRecords(records: SessionRecord[], col: SortColumn, desc = false): SessionRecord[] {
+  const key = (r: SessionRecord): string | number | undefined => {
+    switch (col) {
+      case 'used': return -r.lastUpdatedAt.getTime();
+      case 'status': return STATUS_RANK[r.status];
+      case 'name': return r.name.toLowerCase();
+      case 'branch': return r.gitBranch?.toLowerCase();
+      case 'work': return r.workDir?.toLowerCase();
+      case 'cwd': return r.cwd.toLowerCase();
+    }
+  };
+  return records
+    .map((r, i) => ({ r, i, k: key(r) }))
+    .sort((a, b) => {
+      if (a.k === undefined || b.k === undefined) return a.k === b.k ? a.i - b.i : a.k === undefined ? 1 : -1;
+      const c = typeof a.k === 'number' ? a.k - (b.k as number) : (a.k as string).localeCompare(b.k as string);
+      return (desc ? -c : c) || a.i - b.i;
+    })
+    .map(x => x.r);
+}
+
 function buildRecord(
   id: string,
   jsonlPath: string,
@@ -72,12 +105,14 @@ function buildRecord(
   const launchCwd = live?.cwd ?? decoded.cwd;
   const working = scan.lastCwd && existsSync(scan.lastCwd) ? scan.lastCwd : null;
   const cwd = working ?? launchCwd;
+  const workDir = scan.workDirName ? join(homedir(), 'ClaudWork', scan.workDirName) : null;
   return {
     id,
     name: annotation?.name ?? transcriptName,
     transcriptName,
     cwd,
     launchCwd,
+    workDir: workDir && existsSync(workDir) ? workDir : undefined,
     // A directory the transcript names and that exists is not a guess, however the name decoded.
     cwdDecodeConfident: working !== null || live !== null || decoded.confident,
     jsonlPath,

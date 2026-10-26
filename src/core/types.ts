@@ -24,6 +24,8 @@ export interface SessionRecord {
    * `cwd` — you start in ~/Code and end up working three directories down.
    */
   launchCwd: string;
+  /** `~/ClaudWork/<folder>` the session did its work in, when that folder still exists. */
+  workDir?: string;
   cwdDecodeConfident: boolean;
   jsonlPath: string;
   sizeBytes: number;

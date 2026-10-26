@@ -3,7 +3,8 @@ import { Box, Text, useApp, useInput, render as inkRender } from 'ink';
 import TextInput from 'ink-text-input';
 import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
-import { listSessions } from '../core/sessionRepo.js';
+import { basename } from 'node:path';
+import { listSessions, sortRecords, SORT_COLUMNS, type SortColumn } from '../core/sessionRepo.js';
 import { readTranscript } from '../core/transcript.js';
 import { searchSessions, type SearchMatch } from '../core/search.js';
 import { formatDate, timeAgo } from './format.js';
@@ -90,6 +91,8 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
   const [sessionView, setSessionView] = useState<SessionView>('normal');
   /** null = show both. Tool runs (claude -p, the SDK, MCP) crowd out the sessions you actually sat in. */
   const [kindFilter, setKindFilter] = useState<SessionKind | null>(null);
+  const [sortCol, setSortCol] = useState<SortColumn>('used');
+  const [sortDesc, setSortDesc] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   /** Transient footer note after `c` — cleared by the next keypress. */
   const [copied, setCopied] = useState<string | null>(null);
@@ -108,10 +111,10 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
     if (sessionView === 'hidden') return a?.hidden === true && a?.deleted !== true;
     return a?.hidden !== true && a?.deleted !== true;
   };
-  const visible = records.filter(r =>
-    inView(r) && !(hideDone && r.annotation?.done) && (!kindFilter || r.kind === kindFilter));
+  const visible = sortRecords(records.filter(r =>
+    inView(r) && !(hideDone && r.annotation?.done) && (!kindFilter || r.kind === kindFilter)), sortCol, sortDesc);
   const haystack = (r: SessionRecord) =>
-    `${r.name}  ${tildify(r.cwd)}  ${r.id}  ${(r.annotation?.flags ?? []).map(f => '#' + f).join(' ')}` +
+    `${r.name}  ${tildify(r.cwd)}  ${r.workDir ? basename(r.workDir) : ''}  ${r.id}  ${(r.annotation?.flags ?? []).map(f => '#' + f).join(' ')}` +
     `  ${(r.annotation?.labels ?? []).join(' ')}  ${r.annotation?.note ?? ''}`;
   const filtered = filter ? fuzzyRank(filter, visible, haystack).map(x => x.item) : visible;
   const clamped = Math.min(cursor, Math.max(0, filtered.length - 1));
@@ -366,6 +369,11 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
       return;
     }
     if (input === 'H') { setHideDone(v => !v); setCursor(0); return; }
+    if (input === 'o') {
+      setSortCol(c => SORT_COLUMNS[(SORT_COLUMNS.indexOf(c) + 1) % SORT_COLUMNS.length]);
+      setSortDesc(false); setCursor(0); return;
+    }
+    if (input === 'O') { setSortDesc(v => !v); setCursor(0); return; }
     if (input === 'T') {
       setKindFilter(k => (k === null ? 'interactive' : k === 'interactive' ? 'tool' : null));
       setCursor(0);
@@ -458,7 +466,9 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
   const wBranch = cols >= 90 ? 12 : 8;
   const wUsed = 14; // "Jun 09 10:43"
   const showId = cols >= 110;
-  const fixedCols = 2 + 2 + (showExtras ? 9 : 0) + (showId ? 9 : 0) + 1 + wBranch + 1 + wUsed + 1 + 2;
+  // ClaudWork folder; 0 = column hidden (also when no session has one — no column of dashes)
+  const wWork = cols >= 100 && records.some(r => r.workDir) ? 20 : 0;
+  const fixedCols = 2 + 2 + (showExtras ? 9 : 0) + (showId ? 9 : 0) + 1 + wBranch + 1 + wUsed + 1 + (wWork ? wWork + 1 : 0) + 2;
   const wName = Math.max(10, Math.min(44, Math.floor((tableInner - fixedCols) * 0.6)));
   // The list is the ONLY elastic block on screen, so its height is whatever the fixed chrome
   // and the (content-sized) details pane leave over. Guessing a constant here is what pushed
@@ -538,6 +548,12 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
             </Text>
           </>
         ) : null}
+        {sortCol !== 'used' || sortDesc ? (
+          <>
+            <Text dimColor>  ·  sort </Text>
+            <Text color="yellow">{sortCol} {sortDesc ? '▲' : '▼'}</Text>
+          </>
+        ) : null}
         {filter ? (
           <>
             <Text dimColor>  ·  filter </Text>
@@ -609,9 +625,9 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
       {mode === 'list' || mode === 'filter' || mode === 'annotate' ? (
         <Box marginTop={1} flexDirection="column">
           <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
-            <TableHeader wName={wName} wBranch={wBranch} wUsed={wUsed} extras={showExtras} showId={showId} />
+            <TableHeader wName={wName} wBranch={wBranch} wUsed={wUsed} wWork={wWork} extras={showExtras} showId={showId} sortCol={sortCol} sortDesc={sortDesc} />
             {view.map((r, i) => (
-              <Row key={r.id} r={r} selected={start + i === clamped} marked={marked.has(r.id)} wName={wName} wBranch={wBranch} wUsed={wUsed} bar={listBar[i]} extras={showExtras} showId={showId} />
+              <Row key={r.id} r={r} selected={start + i === clamped} marked={marked.has(r.id)} wName={wName} wBranch={wBranch} wUsed={wUsed} wWork={wWork} bar={listBar[i]} extras={showExtras} showId={showId} />
             ))}
             {filtered.length === 0 ? (
               <Text dimColor>{records.length === 0 ? '(no sessions yet)' : `(no matches for "${filter}")`}</Text>
@@ -715,6 +731,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
           <HelpRow k="H" v="show / hide the sessions marked done" />
           <HelpRow k="T" v="tool runs: everything → interactive only → tool runs only" />
           <HelpRow k="v" v="show the hidden sessions (deleted are CLI/app only)" />
+          <HelpRow k="o / O" v="sort by the next column — used · name · status · branch · work · cwd / reverse" />
           <HelpSection t="annotate the highlighted session" />
           <HelpRow k="e / n" v="name it / attach a note" />
           <HelpRow k="l / f" v="labels — Jira key, repo, topic (l pre-fills it from the branch) / flags" />
@@ -885,20 +902,24 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
   );
 }
 
-function TableHeader({ wName, wBranch, wUsed, extras, showId }: {
-  wName: number; wBranch: number; wUsed: number; extras: boolean; showId: boolean;
+function TableHeader({ wName, wBranch, wUsed, wWork, extras, showId, sortCol, sortDesc }: {
+  wName: number; wBranch: number; wUsed: number; wWork: number; extras: boolean; showId: boolean;
+  sortCol: SortColumn; sortDesc: boolean;
 }) {
+  // ▼ = the column's natural order (newest, busy first, A→Z), ▲ = reversed.
+  const h = (col: SortColumn, label: string) => (sortCol === col ? `${label}${sortDesc ? '▲' : '▼'}` : label);
   return (
     <Box>
-      <Box width={4} flexShrink={0}><Text dimColor bold>ST</Text></Box>
+      <Box width={4} flexShrink={0}><Text dimColor bold>{h('status', 'ST')}</Text></Box>
       {extras ? <Box width={2} flexShrink={0}><Text dimColor bold> </Text></Box> : null}
       {extras ? <Box width={2} flexShrink={0}><Text dimColor bold> </Text></Box> : null}
-      <Box width={wName} marginRight={1} flexShrink={0}><Text dimColor bold>NAME</Text></Box>
+      <Box width={wName} marginRight={1} flexShrink={0}><Text dimColor bold>{h('name', 'NAME')}</Text></Box>
       {extras ? <Box width={5} flexShrink={0}><Text dimColor bold> </Text></Box> : null}
       {showId ? <Box width={9} flexShrink={0}><Text dimColor bold>ID</Text></Box> : null}
-      <Box width={wBranch} marginRight={1} flexShrink={0}><Text dimColor bold>BRANCH</Text></Box>
-      <Box width={wUsed} marginRight={1} flexShrink={0}><Text dimColor bold>LAST USED</Text></Box>
-      <Box flexGrow={1} minWidth={0}><Text dimColor bold>CWD</Text></Box>
+      <Box width={wBranch} marginRight={1} flexShrink={0}><Text dimColor bold>{h('branch', 'BRANCH')}</Text></Box>
+      <Box width={wUsed} marginRight={1} flexShrink={0}><Text dimColor bold>{h('used', 'LAST USED')}</Text></Box>
+      {wWork ? <Box width={wWork} marginRight={1} flexShrink={0}><Text dimColor bold>{h('work', 'WORK')}</Text></Box> : null}
+      <Box flexGrow={1} minWidth={0}><Text dimColor bold>{h('cwd', 'CWD')}</Text></Box>
       <Box width={1} marginLeft={1} flexShrink={0}><Text dimColor> </Text></Box>
     </Box>
   );
@@ -917,9 +938,9 @@ function badgeMarks(r: SessionRecord): Array<{ ch: string; color: string }> {
   return out;
 }
 
-function Row({ r, selected, marked, wName, wBranch, wUsed, bar, extras, showId }: {
+function Row({ r, selected, marked, wName, wBranch, wUsed, wWork, bar, extras, showId }: {
   r: SessionRecord; selected: boolean; marked: boolean;
-  wName: number; wBranch: number; wUsed: number;
+  wName: number; wBranch: number; wUsed: number; wWork: number;
   bar?: string; extras: boolean; showId: boolean;
 }) {
   return (
@@ -943,6 +964,7 @@ function Row({ r, selected, marked, wName, wBranch, wUsed, bar, extras, showId }
       {showId ? <Box width={9} flexShrink={0}><Text dimColor>{r.id.slice(0, 8)}</Text></Box> : null}
       <Box width={wBranch} marginRight={1} flexShrink={0}><Text color="magenta" wrap="truncate-end">{r.gitBranch ?? '–'}</Text></Box>
       <Box width={wUsed} marginRight={1} flexShrink={0}><Text color="cyan" wrap="truncate-end">{formatDate(r.lastUpdatedAt)}</Text></Box>
+      {wWork ? <Box width={wWork} marginRight={1} flexShrink={0}><Text color="blue" wrap="truncate-end">{r.workDir ? basename(r.workDir) : '–'}</Text></Box> : null}
       <Box flexGrow={1} minWidth={0}><Text color="green" wrap="truncate-middle">{tildify(r.cwd)}</Text></Box>
       {bar ? <Box width={1} marginLeft={1} flexShrink={0}><Text dimColor>{bar}</Text></Box> : null}
     </Box>
