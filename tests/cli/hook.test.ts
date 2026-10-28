@@ -53,6 +53,7 @@ describe('sessionStartContext', () => {
     expect(out).toContain('1 other session(s)');
     expect(out).toContain('the other one');
     expect(out).toContain('`agentctl resume bbbb`');
+    expect(out).toContain('agentctl annotations --due');
   });
 
   it('always ends with the tool list so the model knows the commands', () => {
