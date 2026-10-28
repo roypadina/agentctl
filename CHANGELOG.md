@@ -3,6 +3,12 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.12.1] — 2026-10-28
+
+### Fixed
+
+- Session-start hook: the "other sessions have a reminder due" list is a snapshot from when the session started. Claude is now told to re-check with `agentctl annotations --due` before mentioning those reminders again, so long-running sessions no longer repeat reminders that were already cleared.
+
 ## [0.12.0] — 2026-10-26
 
 ### Added

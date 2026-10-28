@@ -1,6 +1,6 @@
 {
   "name": "@roypadina/agentctl",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "Start and resume Claude Code & Codex sessions from one terminal menu — fuzzy-resume past sessions with transcript preview.",
   "type": "module",
   "license": "MIT",
