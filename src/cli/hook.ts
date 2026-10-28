@@ -83,6 +83,10 @@ export function sessionStartContext(raw: string, deps: HookDeps = {}): string {
       const short = x.sessionId.slice(0, 8);
       lines.push(`- "${x.name ?? short}" (session ${short}) — resume: \`agentctl resume ${short}\``);
     }
+    lines.push(
+      'This list is a snapshot from when this session started; reminders get cleared from other sessions.' +
+      ' Before mentioning any of them again later, run `agentctl annotations --due` and mention only what it still lists.',
+    );
   }
 
   lines.push(
