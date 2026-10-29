@@ -3,7 +3,7 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
-## [Unreleased]
+## [0.13.0] — 2026-10-29
 
 ### Added
 
