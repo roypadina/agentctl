@@ -17,6 +17,8 @@ interface AppShellProps {
   projects: ProjectDir[][];
   configError?: ConfigError;
   initialSessions: SessionRecord[] | null;
+  /** `agentctl -p "<question>"`: open Resume already asking Claude this. */
+  initialFind?: string;
 }
 
 function TabBar({ tab }: { tab: Tab }) {
@@ -35,9 +37,11 @@ function TabBar({ tab }: { tab: Tab }) {
 }
 
 /** Single mount holding both screens; ⇥ flips the tab (instant, no remount). */
-export function AppShell({ initialTab, config, warnings, projects, configError, initialSessions }: AppShellProps) {
+export function AppShell({ initialTab, config, warnings, projects, configError, initialSessions, initialFind }: AppShellProps) {
   const { exit } = useApp();
   const [tab, setTab] = useState<Tab>(initialTab);
+  // Ask once: switching tabs remounts Resume, which must not re-run (and re-pay for) the question.
+  const [find, setFind] = useState(initialFind);
   const [sessions, setSessions] = useState<SessionRecord[] | null>(initialSessions);
   const startedResume = useRef(false);
 
@@ -73,10 +77,11 @@ export function AppShell({ initialTab, config, warnings, projects, configError, 
       ) : (
         <ResumeApp
           initial={sessions}
-          onSwitchTab={() => setTab('new')}
+          initialFind={find}
+          onSwitchTab={() => { setFind(undefined); setTab('new'); }}
           // Terminal actions must exit ink — runApp performs the resume only after unmount.
           onResume={(s) => { setScreenResult({ kind: 'resume', record: s }); exit(); }}
-          onBack={() => setTab('new')}
+          onBack={() => { setFind(undefined); setTab('new'); }}
           onQuit={() => { setScreenResult({ kind: 'quit' }); exit(); }}
         />
       )}

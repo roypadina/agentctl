@@ -67,6 +67,7 @@ It's **local-only** — it reads `~/.claude/` and your project folders, and runs
 | 🆕 **New-session launcher** | Grouped project dirs, frecency-sorted (`z`, falls back to mtime), fuzzy filter, git branch per row. |
 | 🔁 **Resume anything** | Every Claude Code session, fuzzy-matched on name / path / id — or full-text searched across transcripts. |
 | 👀 **Transcript peek** | Preview a session's conversation before resuming — inline in the terminal. |
+| 🔎 **Ask Claude to find it** | `S` (or `agentctl -p "the WAF deploy last week"`) — describe a session from memory; Claude picks the matches, you resume one or keep chatting to narrow it down. |
 | 🧠 **AI recap** | `r` summarizes a session (what it was doing, decisions, state, follow-ups) via `claude -p` on haiku, cached. Decide whether to resume without reading the whole transcript. |
 | ⌨️ **Two tabs, one keystroke** | Start in **New**; `⇥` flips to **Resume**; `⇧⇥` cycles the tool. |
 | 🧰 **Your tools & IDEs** | Configure any agent command (`claude`, `codex`, …) and `^`-key IDE binds (VS Code, Rider, …). |
@@ -127,6 +128,7 @@ First run sets up a starter config: `agentctl config --setup`.
 |---|---|
 | `agentctl` | New-session menu (`⇥` to Resume) |
 | `agentctl -r` | Resume menu |
+| `agentctl -p "<question>"` | Resume, already asking Claude which session you mean (piped: prints the matches) |
 
 Plus non-interactive subcommands:
 
@@ -146,7 +148,7 @@ agentctl config --setup | --edit | --path         # manage the shared config
 `^t` tmux · `^p` pull · `^f` file manager · `^`-key IDEs · `?` full keymap · `esc` back.
 
 **Resume** — `↑/↓` (or `j/k`) move · `pgup/pgdn` page · `g/G` first/last · `↵` resume · `p` peek · `r` recap ·
-`/` fuzzy-filter · `s` full-text search · `^r` refresh · `⇥` New · `?` help · `q` quit.
+`/` fuzzy-filter · `s` full-text search · `S` ask Claude (`⇥` flips ask / results) · `^r` refresh · `⇥` New · `?` help · `q` quit.
 Annotate the highlighted session in place: `e` name · `n` note · `l` labels · `f` flags · `t` reminder ·
 `u` due date · `d` done. `c` copies a resume command, `h` hides a session, `x` deletes it (twice),
 `v` shows the hidden ones, `H` shows/hides done ones, `T` filters tool runs. (`l` pre-fills the issue
@@ -291,6 +293,9 @@ names by walking the filesystem — and flagged when the result isn't certain.
 - **Open source (MIT).** Read or build every line yourself.
 - **Local-only. No network calls of its own, no analytics, no accounts.** It reads `~/.claude/` and the
   project folders you configure, and launches your terminal. That's it.
+- **AI features go through your own `claude` CLI.** `r` recap sends a transcript excerpt; `S` / `-p` find
+  sends session metadata (names, paths, first prompts, notes, labels) plus your question. Nothing runs
+  unless you press the key.
 - **Permissions.** Claude sessions start and resume in Claude Code's **auto** permission mode
   (`--permission-mode auto`). To opt into bypass, set `permission_mode = "bypassPermissions"` at the top of
   your config (adds `--dangerously-skip-permissions` to Resume and the built-in `claude` tool). The default

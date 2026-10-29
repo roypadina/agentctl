@@ -13,6 +13,7 @@ import { copyToClipboard, resumeCommand } from '../core/clipboard.js';
 import { listProfiles, profileAccount, type Profile } from '../core/profiles.js';
 import { fuzzyRank } from '../core/fuzzy.js';
 import { getRecap, readCachedRecap, spawnRun } from '../core/recap.js';
+import { findSessions, FindError, type FindDeps, type FindResult, type FindTurn } from '../core/find.js';
 import { loadPermissionMode } from '../core/config/loadConfig.js';
 import { permissionArgs } from '../core/config/defaults.js';
 import { windowFor, scrollbar } from './viewport.js';
@@ -36,7 +37,7 @@ function tildify(p: string): string {
   return p.startsWith(home) ? '~' + p.slice(home.length) : p;
 }
 
-type Mode = 'list' | 'filter' | 'peek' | 'search-input' | 'search-results' | 'help' | 'annotate';
+type Mode = 'list' | 'filter' | 'peek' | 'search-input' | 'search-results' | 'help' | 'annotate' | 'find';
 type PromptKind = 'name' | 'note' | 'flag' | 'label' | 'remind' | 'due';
 
 const PROMPTS: Record<PromptKind, string> = {
@@ -56,9 +57,13 @@ interface AppProps {
   onQuit?: () => void;
   /** ⇥ switches to the New tab (handled by AppShell). */
   onSwitchTab?: () => void;
+  /** `agentctl -p "<question>"`: open in find mode, already asking Claude this. */
+  initialFind?: string;
+  /** Session-finder DI (tests pass a fake `run`). */
+  findDeps?: FindDeps;
 }
 
-export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps) {
+export function App({ initial, onResume, onBack, onQuit, onSwitchTab, initialFind, findDeps }: AppProps) {
   const { exit } = useApp();
 
   const doResume = (raw: SessionRecord) => {
@@ -78,7 +83,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
   const [filter, setFilter] = useState('');
   const [peek, setPeek] = useState<TranscriptTurn[] | null>(null);
   const [peekOffset, setPeekOffset] = useState(0);
-  const [peekFrom, setPeekFrom] = useState<'list' | 'search'>('list');
+  const [peekFrom, setPeekFrom] = useState<'list' | 'search' | 'find'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState<SearchMatch[]>([]);
@@ -258,6 +263,70 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
 
   useEffect(() => () => { searchAbortRef.current?.abort(); }, []);
 
+  // Find (S / `agentctl -p`): ask Claude which session the user means. The chat history is kept
+  // here and resent each turn (core/find.ts); only the last exchange is drawn.
+  const [findInput, setFindInput] = useState('');
+  const [findQuestion, setFindQuestion] = useState('');
+  const [findHistory, setFindHistory] = useState<FindTurn[]>([]);
+  const [findResult, setFindResult] = useState<FindResult | null>(null);
+  const [findCursor, setFindCursor] = useState(0);
+  const [findBusy, setFindBusy] = useState(false);
+  const [findError, setFindError] = useState<string | null>(null);
+  const [findStartedAt, setFindStartedAt] = useState(0);
+  // ink-text-input eats every letter, so the input and the result list take turns (⇥).
+  const [findFocus, setFindFocus] = useState<'input' | 'list'>('input');
+  const [, setTick] = useState(0);
+  const findAbortRef = useRef<AbortController | null>(null);
+  const findInputRef = useRef('');
+  findInputRef.current = findInput;
+  const findHits = findResult?.matches ?? [];
+
+  const stopFind = () => {
+    findAbortRef.current?.abort();
+    findAbortRef.current = null;
+    setFindBusy(false);
+  };
+
+  const ask = (raw: string) => {
+    const question = raw.trim();
+    if (!question) { if (findHits.length > 0) setFindFocus('list'); return; }
+    stopFind();
+    const ac = new AbortController();
+    findAbortRef.current = ac;
+    setFindInput('');
+    setFindQuestion(question);
+    setFindError(null);
+    setFindBusy(true);
+    setFindStartedAt(Date.now());
+    findSessions(visible, findHistory, question, { ...findDeps, signal: ac.signal })
+      .then(r => {
+        if (findAbortRef.current !== ac) return; // cancelled or superseded
+        setFindHistory(h => [...h, { role: 'user', text: question },
+          { role: 'finder', text: r.reply, ids: r.matches.map(m => m.session.id.slice(0, 8)) }]);
+        setFindResult(r);
+        setFindCursor(0);
+        // ⏎ / p work at once — unless a follow-up is already being typed (letters would turn into keys).
+        if (r.matches.length > 0 && !findInputRef.current) setFindFocus('list');
+      })
+      .catch(e => {
+        if (findAbortRef.current !== ac || (e instanceof FindError && e.code === 130)) return;
+        setFindError(e instanceof Error ? e.message : 'find failed');
+      })
+      .finally(() => {
+        if (findAbortRef.current === ac) { findAbortRef.current = null; setFindBusy(false); }
+      });
+  };
+
+  useEffect(() => {
+    if (!findBusy) return;
+    const t = setInterval(() => setTick(n => n + 1), 1000);
+    return () => clearInterval(t);
+  }, [findBusy]);
+  useEffect(() => {
+    if (initialFind !== undefined) { setMode('find'); ask(initialFind); }
+    return () => { findAbortRef.current?.abort(); };
+  }, []);
+
   const keyChunk = useKeyChunk();
 
   useInput((input, key) => {
@@ -284,7 +353,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
     }
     if (mode === 'peek') {
       if (key.escape || input === 'p' || input === 'q') {
-        setMode('list');
+        setMode(peekFrom === 'find' ? 'find' : 'list');
         setPeek(null);
         setPeekOffset(0);
         return;
@@ -297,6 +366,43 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
       if (key.pageDown) { setPeekOffset(o => Math.max(0, o - peekWindow)); return; }
       if (input === 'g') { setPeekOffset(maxPeekOffset); return; }
       if (input === 'G') { setPeekOffset(0); return; }
+      return;
+    }
+    if (mode === 'find') {
+      if (key.escape) {
+        if (findBusy) { stopFind(); return; }
+        if (findFocus === 'input' && findInput) { setFindInput(''); return; }
+        setMode('list');
+        return;
+      }
+      if (key.tab) { setFindFocus(f => (f === 'input' ? 'list' : 'input')); return; }
+      const last = Math.max(0, findHits.length - 1);
+      if (findFocus === 'input') {
+        // ↑/↓ still move the results while typing (TextInput ignores them); j/k are text here.
+        if (movedArrows !== 0) setFindCursor(c => Math.max(0, Math.min(last, c + movedArrows)));
+        return; // TextInput owns the rest; ⏎ → ask
+      }
+      if (moved !== 0) setFindCursor(c => Math.max(0, Math.min(last, c + moved)));
+      if (key.pageUp) setFindCursor(c => Math.max(0, c - findPerView));
+      if (key.pageDown) setFindCursor(c => Math.min(last, c + findPerView));
+      if (input === 'g') setFindCursor(0);
+      if (input === 'G') setFindCursor(last);
+      if (input === 'x' && findBusy) { stopFind(); return; }
+      if (input === 'q') { stopFind(); setMode('list'); return; }
+      if (input === 'i' || input === 'S') { setFindFocus('input'); return; }
+      const hit = findHits[findCursor];
+      if (input === 'p' && hit) {
+        stopFind(); // a late answer would swap the list under the peek
+        readTranscript(hit.session.jsonlPath)
+          .then(turns => { setPeek(turns); setPeekOffset(0); })
+          .catch(() => { setPeek([]); setPeekOffset(0); });
+        setPeekFrom('find');
+        setMode('peek');
+      }
+      if (key.return && hit) {
+        stopFind();
+        doResume(hit.session);
+      }
       return;
     }
     if (mode === 'search-results') {
@@ -432,6 +538,11 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
       setSearchInput(searchQuery);
       setMode('search-input');
     }
+    if (input === 'S') {
+      setFindFocus('input');
+      setMode('find');
+      return;
+    }
     if (input === 'p') {
       const s = filtered[clamped];
       if (s) {
@@ -505,6 +616,14 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
   const searchPerView = Math.max(2, Math.floor((rows - 10) / 2));
   const { start: searchStart, end: searchEnd } = windowFor(searchResults.length, searchCursor, searchPerView);
   const searchView = searchResults.slice(searchStart, searchEnd);
+  // Find: chrome ≈ tab bar 2 + header 2 + gaps 3 + status/you 2 + input 1 + footer 2, then the reply.
+  const replyWidth = Math.max(20, cols - 13);
+  const reply = findResult?.reply ? truncReply(findResult.reply, replyWidth * 3) : '';
+  // Word-wrap needs more lines than chars/width; the slack + the fixed-height box keep the frame bounded.
+  const replyLines = reply ? Math.min(3, Math.ceil(reply.length / (replyWidth * 0.85))) : 0;
+  const findPerView = Math.max(1, Math.floor((rows - 12 - replyLines - (findError ? 1 : 0)) / 2));
+  const { start: findStart, end: findEnd } = windowFor(findHits.length, findCursor, findPerView);
+  const findView = findHits.slice(findStart, findEnd);
 
   const renderHeader = () => (
     <Box flexDirection="column">
@@ -560,7 +679,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
             <Text color="yellow">{filter}</Text>
           </>
         ) : null}
-        {mode !== 'search-results' ? (
+        {mode !== 'search-results' && mode !== 'find' ? (
           <>
             <Text dimColor>  ·  </Text>
             <Text color="gray">{filtered.length === 0 ? 0 : clamped + 1}/{filtered.length}</Text>
@@ -684,34 +803,73 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
             </Box>
           ) : (
             <Box marginTop={1} flexDirection="column">
-              {searchView.map((m, vi) => {
-                const i = searchStart + vi;
-                const isSel = i === searchCursor;
-                const marker = isSel ? '▶' : ' ';
-                return (
-                  <Box key={m.session.id + ':' + m.matchedLine} flexDirection="column">
-                    <Box>
-                      <Text bold color={isSel ? 'yellow' : 'gray'}>{marker} </Text>
-                      <Text color={STATUS_COLOR[m.session.status]} bold>{STATUS_DOT[m.session.status]}</Text>
-                      <Text>  </Text>
-                      <Text bold color={isSel ? 'cyan' : 'white'}>{m.session.name}</Text>
-                      <Text dimColor>   </Text>
-                      <Text color="magenta">{m.session.id.slice(0, 8)}</Text>
-                      <Text dimColor>   </Text>
-                      <Text color="cyan">{formatDate(m.session.lastUpdatedAt)}</Text>
-                      <Text dimColor> (</Text>
-                      <Text color="yellow">{timeAgo(m.session.lastUpdatedAt)}</Text>
-                      <Text dimColor>)</Text>
-                    </Box>
-                    <Box marginLeft={4}>
-                      <Text dimColor>… </Text>
-                      <Text color={isSel ? 'white' : 'gray'}>{highlight(m.excerpt, searchQuery, cols - 10)}</Text>
-                    </Box>
-                  </Box>
-                );
-              })}
+              {searchView.map((m, vi) => (
+                <SearchHit key={m.session.id + ':' + m.matchedLine} session={m.session}
+                  excerpt={highlight(m.excerpt, searchQuery, cols - 10)} selected={searchStart + vi === searchCursor} />
+              ))}
             </Box>
           )}
+        </Box>
+      ) : null}
+
+      {mode === 'find' ? (
+        <Box marginTop={1} flexDirection="column">
+          <Box>
+            <Text color="magenta">✱ </Text>
+            <Text color="white" bold>ask Claude</Text>
+            <Text dimColor>   </Text>
+            {findBusy ? (
+              <>
+                <Text color="yellow">thinking… {Math.round((Date.now() - findStartedAt) / 1000)}s</Text>
+                <Text dimColor>   esc cancel</Text>
+              </>
+            ) : findResult ? (
+              <>
+                <Text color="cyan">{findHits.length}</Text>
+                <Text dimColor> matches</Text>
+                {findHits.length > 0 ? (
+                  <>
+                    <Text dimColor>   </Text>
+                    <Text color="gray">{findCursor + 1}/{findHits.length}</Text>
+                  </>
+                ) : null}
+              </>
+            ) : null}
+          </Box>
+          {findQuestion ? (
+            <Box>
+              <Box width={10} flexShrink={0}><Text color="cyan">you ›</Text></Box>
+              <Text wrap="truncate-end">{findQuestion}</Text>
+            </Box>
+          ) : null}
+          {reply ? (
+            <Box>
+              <Box width={10} flexShrink={0}><Text color="green">claude ›</Text></Box>
+              <Box width={replyWidth} height={replyLines} overflow="hidden"><Text>{reply}</Text></Box>
+            </Box>
+          ) : null}
+          {findError ? <Text color="red" wrap="truncate-end">{findError}</Text> : null}
+          <Box marginTop={1} flexDirection="column">
+            {findHits.length === 0 ? (
+              <Text dimColor>
+                {findBusy ? ' ' : findResult ? '(no matching sessions)'
+                  : '(describe the session, e.g. "the one where we deployed the WAF last week")'}
+              </Text>
+            ) : findView.map((m, vi) => (
+              <SearchHit key={m.session.id} session={m.session} excerpt={truncReply(m.why, cols - 10)}
+                selected={findStart + vi === findCursor} />
+            ))}
+          </Box>
+          <Box marginTop={1}>
+            <Text color={findFocus === 'input' ? 'magenta' : 'gray'}>ask: </Text>
+            <TextInput
+              value={findInput}
+              onChange={setFindInput}
+              onSubmit={ask}
+              focus={findFocus === 'input'}
+              placeholder={findHistory.length > 0 ? 'narrow it down…' : 'which session are you looking for?'}
+            />
+          </Box>
         </Box>
       ) : null}
 
@@ -728,6 +886,7 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
           <HelpSection t="find" />
           <HelpRow k="/" v="fuzzy-filter on name, path, id, labels, flags, note" />
           <HelpRow k="s" v="full-text search inside every transcript" />
+          <HelpRow k="S" v="ask Claude which session it was — ⇥ flips ask / results, keep chatting to narrow" />
           <HelpRow k="H" v="show / hide the sessions marked done" />
           <HelpRow k="T" v="tool runs: everything → interactive only → tool runs only" />
           <HelpRow k="v" v="show the hidden sessions (deleted are CLI/app only)" />
@@ -770,7 +929,8 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
         const sliceStart = Math.max(0, end - peekWindow);
         const visible = peek.slice(sliceStart, end);
         const fromSearch = peekFrom === 'search' && !!searchResults[searchCursor];
-        const sel = fromSearch ? searchResults[searchCursor].session : filtered[clamped];
+        const fromFind = peekFrom === 'find' && !!findHits[findCursor];
+        const sel = fromFind ? findHits[findCursor].session : fromSearch ? searchResults[searchCursor].session : filtered[clamped];
 
         const peekBox = (
           <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1} flexGrow={1}>
@@ -812,8 +972,8 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
         if (!wide) return <Box marginTop={1}>{peekBox}</Box>;
 
         // Wide terminal: keep a slim session rail on the left for context while reading.
-        const list = fromSearch ? searchResults.map((m) => m.session) : filtered;
-        const cur = fromSearch ? searchCursor : clamped;
+        const list = fromFind ? findHits.map((m) => m.session) : fromSearch ? searchResults.map((m) => m.session) : filtered;
+        const cur = fromFind ? findCursor : fromSearch ? searchCursor : clamped;
         const railStart = Math.max(0, Math.min(Math.max(0, list.length - peekWindow), cur - Math.floor(peekWindow / 2)));
         const railSlice = list.slice(railStart, railStart + peekWindow);
         return (
@@ -848,6 +1008,23 @@ export function App({ initial, onResume, onBack, onQuit, onSwitchTab }: AppProps
         <Box marginTop={1}>
           {copied ? (
             <Text color="green" wrap="truncate-end">✓ copied to clipboard: {copied}</Text>
+          ) : mode === 'find' ? (
+            findFocus === 'input' ? (
+              <>
+                <Text dimColor>⏎ </Text><Text color="white">ask</Text>
+                <Text dimColor>  ·  ↑/↓ </Text><Text color="white">move</Text>
+                <Text dimColor>  ·  ⇥ </Text><Text color="white">results</Text>
+                <Text dimColor>  ·  esc </Text><Text color="white">{findBusy ? 'cancel' : 'back'}</Text>
+              </>
+            ) : (
+              <>
+                <Text dimColor>↑/↓ </Text><Text color="white">move</Text>
+                <Text dimColor>  ·  ⏎ </Text><Text color="white">resume</Text>
+                <Text dimColor>  ·  p </Text><Text color="white">peek</Text>
+                <Text dimColor>  ·  ⇥ </Text><Text color="white">ask more</Text>
+                <Text dimColor>  ·  esc </Text><Text color="white">{findBusy ? 'cancel' : 'back'}</Text>
+              </>
+            )
           ) : mode === 'search-results' ? (
             <>
               <Text dimColor>↑/↓ </Text>
@@ -1092,6 +1269,37 @@ function HelpRow({ k, v }: { k: string; v: string }) {
       <Text dimColor>{v}</Text>
     </Box>
   );
+}
+
+/** Two-line result row shared by full-text search and find: session line + excerpt / why. */
+function SearchHit({ session, excerpt, selected }: { session: SessionRecord; excerpt: string; selected: boolean }) {
+  return (
+    <Box flexDirection="column">
+      <Box>
+        <Text bold color={selected ? 'yellow' : 'gray'}>{selected ? '▶' : ' '} </Text>
+        <Text color={STATUS_COLOR[session.status]} bold>{STATUS_DOT[session.status]}</Text>
+        <Text>  </Text>
+        <Text bold color={selected ? 'cyan' : 'white'} wrap="truncate-end">{session.name}</Text>
+        <Text dimColor>   </Text>
+        <Text color="magenta">{session.id.slice(0, 8)}</Text>
+        <Text dimColor>   </Text>
+        <Text color="cyan">{formatDate(session.lastUpdatedAt)}</Text>
+        <Text dimColor> (</Text>
+        <Text color="yellow">{timeAgo(session.lastUpdatedAt)}</Text>
+        <Text dimColor>)</Text>
+      </Box>
+      <Box marginLeft={4}>
+        <Text dimColor>… </Text>
+        {/* exactly two lines per hit — the windowing math counts on it */}
+        <Text color={selected ? 'white' : 'gray'} wrap="truncate-end">{excerpt}</Text>
+      </Box>
+    </Box>
+  );
+}
+
+function truncReply(text: string, maxLen: number): string {
+  const t = text.replace(/\s+/g, ' ').trim();
+  return t.length > maxLen ? t.slice(0, maxLen - 1) + '…' : t;
 }
 
 function highlight(text: string, query: string, maxLen: number): string {

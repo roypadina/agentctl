@@ -35,6 +35,7 @@ src/core/                 zero ink/react imports — pure data
   annotations.ts          user metadata per session (name/note/flags/done/reminder), one JSON
                           file each under ~/.config/agentctl/annotations/, atomic writes
   recap.ts                on-demand AI recap: claude -p --model haiku on head+tail excerpt, cached to ~/.config/agentctl/recaps/<id>.md (DI'd I/O + spawn)
+  find.ts                 "ask Claude to find a session": metadata catalog + chat history → isolated claude -p --json-schema (DI'd spawn)
   config/                 Agentctl launcher config (TOML, smol-toml)
     types.ts              GroupConfig/ToolConfig/IdeConfig/ThemeConfig, ConfigError
     paths.ts              configPath chain + expandPath (~ / allowlisted $VAR)
@@ -78,6 +79,12 @@ bin/agentctl                  Node shebang shim → dist/cli.js
 - **Session names** come from JSONL in priority order: `type:custom-title.customTitle` (from `/rename`) → `type:ai-title.aiTitle` (auto-generated) → first user prompt (with tag stripping) → `(no prompt yet)`.
 - **Status detection**: a session is `busy`/`idle` only when a matching `<profile>/sessions/<pid>.json` file exists, `kill -0 <pid>` succeeds, and `ps -o comm= -p <pid>` matches `/claude/i`. Otherwise `inactive`.
 - **Scan every Claude profile.** `CLAUDE_CONFIG_DIR` lets one machine run several homes (`~/.claude`, `~/.claude2`, `~/.claude-work`). Each keeps its own `sessions/` dir, so scanning only `~/.claude` reports every side-profile session as `inactive`. `claudeHomes()` globs `~/.claude*` dirs (primary first); `projectsDirs()`/`sessionsDirs()` map + realpath-dedupe them (profiles often symlink `projects/` to the primary — without the dedupe every session would list twice). `AGENTCTL_HOME` still pins the scan to a single home.
+- **The session finder must stay isolated.** `find.ts` runs `claude -p` in the empty
+  `~/.config/agentctl/find/` with `--setting-sources project --strict-mcp-config
+  --disable-slash-commands --system-prompt … --tools "" --no-session-persistence`. Without them the
+  user's plugins, MCP servers, hooks and CLAUDE.md load into every run (measured $0.75 / 32 s vs
+  $0.0003 / 3 s). Never `--bare` — it skips keychain reads, so subscription logins fail. Chat history
+  is held by agentctl and resent each turn; `listSessions` skips the finder's project dir as a backstop.
 
 ## Agentctl launcher conventions
 

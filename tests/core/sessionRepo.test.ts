@@ -48,6 +48,23 @@ describe('listSessions', () => {
     expect(none).toHaveLength(0);
   });
 
+  it('never lists a session finder transcript, and exposes the first prompt', async () => {
+    const origXdg = process.env.XDG_CONFIG_HOME;
+    process.env.XDG_CONFIG_HOME = join(home, 'xdg.cfg');
+    try {
+      const finder = join(home, 'projects', join(home, 'xdg.cfg', 'agentctl', 'find').replace(/[^A-Za-z0-9]/g, '-'));
+      mkdirSync(finder, { recursive: true });
+      writeFileSync(join(finder, 'cccccccc-cccc-cccc-cccc-cccccccccccc.jsonl'),
+        `{"type":"user","timestamp":1700000020000,"message":{"role":"user","content":"catalog"}}\n`);
+      const records = await listSessions();
+      expect(records.map(r => r.id[0]).sort()).toEqual(['a', 'b']);
+      expect(records.map(r => r.firstPrompt).sort()).toEqual(['first session', 'second session']);
+    } finally {
+      if (origXdg === undefined) delete process.env.XDG_CONFIG_HOME;
+      else process.env.XDG_CONFIG_HOME = origXdg;
+    }
+  });
+
   it('separates tool runs from interactive sessions, and filters on it', async () => {
     // A third transcript, stamped the way `claude -p` stamps a headless run.
     const encoded = cwd.replaceAll('/', '-');

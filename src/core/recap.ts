@@ -104,14 +104,18 @@ function defaultRun(bin: string): (args: string[], input: string) => RecapRun {
  * Non-blocking spawn runner for in-process callers (the ink TUI) — `spawnSync` would freeze the
  * event loop while the agent thinks. Resolves once the child exits.
  */
-export function spawnRun(bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude') {
+export function spawnRun(
+  bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude',
+  opts: { cwd?: string; signal?: AbortSignal } = {},
+) {
   return (args: string[], input: string): Promise<RecapRun> =>
     new Promise((resolve) => {
       let stdout = '';
       let settled = false;
       let child;
       try {
-        child = spawn(bin, args, { stdio: ['pipe', 'pipe', 'ignore'] });
+        // `signal` kills the child on abort and surfaces as an AbortError on 'error'.
+        child = spawn(bin, args, { stdio: ['pipe', 'pipe', 'ignore'], cwd: opts.cwd, signal: opts.signal });
       } catch (error) {
         resolve({ stdout: '', status: null, error: error as Error });
         return;
@@ -120,6 +124,7 @@ export function spawnRun(bin = process.env.AGENTCTL_CLAUDE_BIN ?? 'claude') {
       child.stdout?.on('data', (d: string) => { stdout += d; });
       child.on('error', (error) => { if (!settled) { settled = true; resolve({ stdout, status: null, error }); } });
       child.on('close', (status) => { if (!settled) { settled = true; resolve({ stdout, status }); } });
+      child.stdin?.on('error', () => { /* EPIPE when the child exits early; 'close' reports it */ });
       child.stdin?.end(input);
     });
 }

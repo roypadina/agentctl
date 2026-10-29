@@ -13,6 +13,8 @@ export interface SessionRecord {
   name: string;
   /** Name derived from the JSONL alone (custom-title → ai-title → first prompt). */
   transcriptName: string;
+  /** First user prompt, tags stripped — the session finder's strongest topic signal. */
+  firstPrompt?: string;
   /**
    * Where the work actually happened — the last directory the transcript recorded, which follows
    * the session as it moves. Falls back to `launchCwd` when the transcript names nowhere that

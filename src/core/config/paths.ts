@@ -14,6 +14,11 @@ export function configDir(): string {
   return join(base, 'agentctl');
 }
 
+/** Empty cwd the session finder runs `claude -p` in (see core/find.ts). */
+export function findDir(): string {
+  return join(configDir(), 'find');
+}
+
 export function configPath(): string {
   const explicit = process.env.AGENTCTL_CONFIG;
   if (explicit && explicit.trim()) return explicit;
