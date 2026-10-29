@@ -32,7 +32,7 @@ function drainTty(): void {
 }
 
 /** Mount the app (New by default, switchable to Resume), then run any deferred launch. */
-export async function runApp(initial: Screen): Promise<void> {
+export async function runApp(initial: Screen, opts: { find?: string } = {}): Promise<void> {
   pending = { kind: 'quit' } as ScreenResult;
   const tab: Tab = initial === 'resume' ? 'resume' : 'new';
 
@@ -57,6 +57,7 @@ export async function runApp(initial: Screen): Promise<void> {
       projects={projects}
       configError={configError}
       initialSessions={initialSessions}
+      initialFind={opts.find}
     />,
   );
   await instance.waitUntilExit();

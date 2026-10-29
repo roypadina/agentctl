@@ -9,6 +9,8 @@ import { renderTable } from './render.js';
 import { renderPeek } from './peek.js';
 import { resume, ResumeError } from './resume.js';
 import { getRecap, RecapError } from '../core/recap.js';
+import { findSessions, FindError } from '../core/find.js';
+import { formatDate } from './format.js';
 import { registerConfigCommands } from './config.js';
 import { registerAnnotateCommands } from './annotate.js';
 import { registerHookCommands } from './hook.js';
@@ -38,10 +40,15 @@ export function buildProgram(): Command {
     .description('Agentctl — start a new Claude/Codex session in a project, or search + resume an existing one')
     .version(PKG_VERSION)
     .option('-r, --resume', 'open the Resume menu (default opens New)')
+    .option('-p, --prompt <question>', 'ask Claude which session you mean, then pick it from its answer')
+    // Root options only BEFORE a subcommand — otherwise root -p would swallow `resume -p <profile>`.
+    .enablePositionalOptions()
     .addHelpText('after', `
 Two menus
   agentctl                 New — pick a project directory, start a session there
   agentctl -r              Resume — search every past session and pick one up
+  agentctl -p "the WAF deploy last week"
+                           ask Claude which session it was; chat to narrow it down
   ? inside either menu     the full keymap and what every marker means
 
 Annotate a session
@@ -68,8 +75,10 @@ Where things live
 
 Support Agentctl: https://ko-fi.com/roypadina
 `)
-    .action(async (opts: { resume?: boolean }) => {
+    .action(async (opts: { resume?: boolean; prompt?: string }) => {
+      if (opts.prompt !== undefined && !process.stdout.isTTY) { await printFind(opts.prompt); return; }
       const { runApp } = await import('./router.js');
+      if (opts.prompt !== undefined) { await runApp('resume', { find: opts.prompt }); return; }
       await runApp(opts.resume ? 'resume' : 'new');
     });
 
@@ -185,6 +194,22 @@ Support Agentctl: https://ko-fi.com/roypadina
   registerHookCommands(program);
   registerConfigCommands(program);
   return program;
+}
+
+/** `agentctl -p` with stdout piped/redirected: plain answer, no TUI. Exit 1 when nothing matched. */
+async function printFind(question: string): Promise<void> {
+  try {
+    const r = await findSessions(await listSessions({ view: 'normal' }), [], question);
+    if (r.reply) console.log(r.reply);
+    for (const m of r.matches) {
+      console.log(`${m.session.id.slice(0, 8)}  ${formatDate(m.session.lastUpdatedAt)}  ${m.session.name}`);
+      if (m.why) console.log(`    ${m.why}`);
+    }
+    if (r.matches.length === 0) process.exit(1);
+  } catch (e) {
+    if (e instanceof FindError) { console.error(e.message); process.exit(e.code); }
+    throw e;
+  }
 }
 
 async function main() {

@@ -3,6 +3,14 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.13.0] — 2026-10-29
+
+### Added
+
+- Resume: **ask Claude to find a session.** `S` opens an ask box — describe the session from memory ("the one where we deployed the WAF last week"); Claude picks the matching sessions from their names, folders, first prompts, notes and labels, and they list like search results (`↵` resume, `p` peek). Keep typing to narrow it down: follow-ups continue the same conversation. `⇥` flips between the ask box and the results.
+- `agentctl -p "<question>"` opens Resume already asking; with stdout piped it prints the matches instead.
+- The finder runs `claude -p` isolated (no tools, plugins, MCP servers, hooks or saved transcript) on haiku in about 10 seconds; `AGENTCTL_FIND_MODEL` picks another model.
+
 ## [0.12.1] — 2026-10-28
 
 ### Fixed

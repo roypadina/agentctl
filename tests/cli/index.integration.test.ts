@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, statSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,10 +10,10 @@ const entry = join(here, '..', '..', 'src', 'cli', 'index.ts');
 let home: string;
 let cwdDir: string;
 
-function runCli(args: string[]) {
+function runCli(args: string[], env: Record<string, string> = {}) {
   return spawnSync('npx', ['tsx', entry, ...args], {
     encoding: 'utf8',
-    env: { ...process.env, AGENTCTL_HOME: home, XDG_CONFIG_HOME: home, FORCE_COLOR: '0' },
+    env: { ...process.env, AGENTCTL_HOME: home, XDG_CONFIG_HOME: home, FORCE_COLOR: '0', ...env },
   });
 }
 
@@ -35,6 +35,26 @@ afterAll(() => {
 });
 
 describe('agentctl CLI', () => {
+  it('root -p does not swallow `resume <id> -p <profile>`', () => {
+    const r = runCli(['resume', 'aaaaaaaa', '-p', 'nope']);
+    expect(r.status).toBe(2);
+    expect(r.stderr).toContain("no logged-in Claude profile matches 'nope'");
+  });
+
+  it('-p with piped stdout prints Claude\'s pick without the TUI', () => {
+    // Fake claude: answers with the fixture session, and records argv to prove the isolation flags.
+    const bin = join(home, 'fake-claude.sh');
+    const out = JSON.stringify({ type: 'result', is_error: false, structured_output: {
+      reply: 'Found the fixture.', matches: [{ id: 'aaaaaaaa', why: 'it says hi' }] } });
+    writeFileSync(bin, `#!/bin/sh\necho "$@" > "${home}/argv.txt"\ncat > /dev/null\necho '${out}'\n`, { mode: 0o755 });
+    const r = runCli(['-p', 'the hi one'], { AGENTCTL_CLAUDE_BIN: bin });
+    expect(r.stderr).toBe('');
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain('Found the fixture.');
+    expect(r.stdout).toMatch(/aaaaaaaa {2}.* {2}hi from fixture\n {4}it says hi/);
+    expect(readFileSync(join(home, 'argv.txt'), 'utf8')).toContain('--no-session-persistence');
+  });
+
   it('ls --json returns an array with the fixture session', () => {
     const r = runCli(['ls', '--json']);
     expect(r.status).toBe(0);

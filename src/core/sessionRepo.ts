@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, realpathSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { projectsDirs } from './paths.js';
@@ -7,6 +7,7 @@ import { scanJsonl, kindOf } from './jsonlScan.js';
 import { liveSessionMap } from './liveState.js';
 import { readGitBranch } from './git.js';
 import { readAllAnnotations } from './annotations.js';
+import { findDir } from './config/paths.js';
 import type { Stats } from 'node:fs';
 import type { Annotation, ListOptions, LiveSession, SessionRecord, SessionView } from './types.js';
 
@@ -14,6 +15,10 @@ export async function listSessions(opts: ListOptions = {}): Promise<SessionRecor
   const out: SessionRecord[] = [];
   const live = liveSessionMap();
   const annotations = readAllAnnotations();
+  // The session finder runs with --no-session-persistence; should a transcript appear anyway, it
+  // must never list (or feed the next finder catalog). Claude encodes every non-alnum char as '-'.
+  const fd = findDir();
+  const finderDir = (existsSync(fd) ? realpathSync(fd) : fd).replace(/[^A-Za-z0-9]/g, '-');
   for (const root of projectsDirs()) {
     let projectDirs: string[];
     try {
@@ -22,7 +27,7 @@ export async function listSessions(opts: ListOptions = {}): Promise<SessionRecor
       continue;
     }
     for (const dir of projectDirs) {
-      if (!dir.startsWith('-')) continue;
+      if (!dir.startsWith('-') || dir === finderDir) continue;
       const decoded = decodeCwd(dir);
       if (opts.cwd && decoded.cwd !== opts.cwd) continue;
       const projectPath = join(root, dir);
@@ -110,6 +115,7 @@ function buildRecord(
     id,
     name: annotation?.name ?? transcriptName,
     transcriptName,
+    firstPrompt: scan.firstPrompt ?? undefined,
     cwd,
     launchCwd,
     workDir: workDir && existsSync(workDir) ? workDir : undefined,
