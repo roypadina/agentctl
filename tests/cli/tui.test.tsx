@@ -4,6 +4,10 @@ import { render } from 'ink-testing-library';
 import { App } from '../../src/cli/tui.js';
 import type { SessionRecord } from '../../src/core/types.js';
 
+/** One timestamp for every record: the TUI sorts newest-first, so a per-record `new Date()` that
+ * crosses a millisecond tick mid-build reorders the list and flakes order-dependent tests. */
+const NOW = new Date();
+
 function rec(id: string, name: string): SessionRecord {
   return {
     id, name, transcriptName: name, cwd: '/tmp', launchCwd: '/tmp',
@@ -11,8 +15,8 @@ function rec(id: string, name: string): SessionRecord {
     kind: 'interactive' as const,
     jsonlPath: '/x.jsonl',
     sizeBytes: 0,
-    startedAt: new Date(),
-    lastUpdatedAt: new Date(),
+    startedAt: NOW,
+    lastUpdatedAt: NOW,
     active: false,
     status: 'inactive',
   };

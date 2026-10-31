@@ -48,7 +48,12 @@ describe('resume', () => {
   it('spawns claude with --resume and --permission-mode auto by default', () => {
     const spawn = vi.fn(() => ({ status: 0, error: undefined })) as never;
     const exit = vi.fn();
-    resume(record(), {}, { exists: () => true, spawn, exit: exit as never, permissionMode: () => 'auto' });
+    vi.stubEnv('AGENTCTL_CLAUDE_BIN', undefined); // a shell that exports an override would change the bin
+    try {
+      resume(record(), {}, { exists: () => true, spawn, exit: exit as never, permissionMode: () => 'auto' });
+    } finally {
+      vi.unstubAllEnvs();
+    }
     expect(spawn).toHaveBeenCalledOnce();
     const call = (spawn as unknown as { mock: { calls: unknown[][] } }).mock.calls[0];
     expect(call[0]).toBe('claude');
