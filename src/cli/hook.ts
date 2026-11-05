@@ -1,9 +1,10 @@
 import type { Command } from 'commander';
 import {
-  detectIssueKeys, isOverdue, isReminderDue, readAllAnnotations, readAnnotation,
+  detectIssueKeys, isOverdue, isReminderDue, isValidSessionId, readAllAnnotations, readAnnotation, writeAnnotation,
 } from '../core/annotations.js';
 import { readGitBranch } from '../core/git.js';
-import type { Annotation } from '../core/types.js';
+import { bumpPromptCount, registryEntry } from '../core/liveState.js';
+import type { Annotation, RegistryEntry } from '../core/types.js';
 
 // Entry points for the agentctl-sessions Claude Code plugin. A hook must NEVER break the session it
 // runs in, so every path here exits 0 and prints nothing rather than throwing.
@@ -13,6 +14,14 @@ export interface HookDeps {
   all?: () => Map<string, Annotation>;
   now?: Date;
   branch?: (cwd: string | undefined) => string | null;
+  registry?: (id: string) => RegistryEntry | null;
+  setName?: (id: string, name: string) => void;
+  bump?: (id: string) => number;
+}
+
+/** Claude Code tracks a human `/rename` for this session, so the prompt hook owns naming. */
+function registryNames(e: RegistryEntry | null): e is RegistryEntry {
+  return e?.kind === 'interactive' && typeof e.nameSource === 'string';
 }
 
 /** The session's working directory, used to read its git branch for an issue key. */
@@ -51,7 +60,7 @@ export function sessionStartContext(raw: string, deps: HookDeps = {}): string {
   const lines: string[] = [];
 
   if (a?.name) lines.push(`Agentctl calls this session "${a.name}".`);
-  else {
+  else if (!registryNames((deps.registry ?? registryEntry)(id))) {
     lines.push(
       'This session has no Agentctl name. Once the user\'s first task is clear, name it with' +
       ' `agentctl name "<3-5 words>"` — run it once, quietly, and do not ask permission or announce it.',
@@ -98,6 +107,33 @@ export function sessionStartContext(raw: string, deps: HookDeps = {}): string {
   return lines.join('\n') + '\n';
 }
 
+/**
+ * Context injected at UserPromptSubmit: until the user gives this session a human `/rename` name
+ * (other sessions can only @-address those), ask the model to propose one. Silent — zero tokens —
+ * once named, and on the first prompt, which rarely makes the task clear. Once named, the Agentctl
+ * name follows the `/rename` name, so there is one name everywhere.
+ */
+export function userPromptContext(raw: string, deps: HookDeps = {}): string {
+  const id = parseSessionId(raw);
+  if (!id || !isValidSessionId(id)) return '';
+  const entry = (deps.registry ?? registryEntry)(id);
+  if (!registryNames(entry)) return '';
+  if (entry.nameSource !== 'derived') {
+    const a = (deps.annotation ?? ((i: string) => readAnnotation(i)))(id);
+    if (entry.name && a?.name !== entry.name) {
+      (deps.setName ?? ((i: string, n: string) => { writeAnnotation(i, { name: n }); }))(id, entry.name);
+    }
+    return '';
+  }
+  if ((deps.bump ?? ((i: string) => bumpPromptCount(i)))(id) < 2) return '';
+  return (
+    'This session has no human name yet, so other sessions cannot @-address it. Propose ONE short' +
+    ' kebab-case name from the subject plus a Jira key / PR number / role (e.g. RD-14189-linear-history,' +
+    ' pr-412-review; keep your earlier pick unless the task changed), run `agentctl name "<name>"`, and end' +
+    ' your reply with `Rename: **/rename <name>**` on its own line.\n'
+  );
+}
+
 function readStdin(): Promise<string> {
   return new Promise(resolve => {
     if (process.stdin.isTTY) { resolve(''); return; }
@@ -120,6 +156,17 @@ export function registerHookCommands(program: Command) {
     .action(async () => {
       try {
         process.stdout.write(sessionStartContext(await readStdin()));
+      } catch {
+        // never break the session that ran us
+      }
+    });
+
+  hook
+    .command('user-prompt-submit')
+    .description('print UserPromptSubmit context: ask for a /rename until the session has a human name')
+    .action(async () => {
+      try {
+        process.stdout.write(userPromptContext(await readStdin()));
       } catch {
         // never break the session that ran us
       }

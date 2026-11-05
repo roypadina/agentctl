@@ -3,6 +3,16 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.14.0] — 2026-11-05
+
+### Added
+
+- `agentctl hook user-prompt-submit` (agentctl-sessions plugin 0.3.0): until the session has a human `/rename` name — the only kind other sessions can @-address — it asks Claude, from the second prompt on, to propose a short kebab name, run `agentctl name` and end the reply with `Rename: **/rename <name>**`. Silent once renamed, and the Agentctl name then follows the `/rename` name. Reads Claude Code's own `sessions/<pid>.json` record (`nameSource`); no network, no model call, ~30 ms.
+
+### Changed
+
+- `agentctl hook session-start` drops its "no Agentctl name" nudge when Claude Code records `/rename` for the session (the prompt hook covers naming); older Claude Code keeps it.
+
 ## [0.13.0] — 2026-10-29
 
 ### Added
