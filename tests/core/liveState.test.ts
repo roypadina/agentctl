@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { readLiveSessions, isPidAlive, liveSessionById } from '../../src/core/liveState.js';
+import { readLiveSessions, isPidAlive, liveSessionById, registryEntry, bumpPromptCount } from '../../src/core/liveState.js';
 
 let home: string;
 let origHome: string | undefined;
@@ -36,6 +36,28 @@ describe('readLiveSessions', () => {
     const out = readLiveSessions();
     expect(out).toHaveLength(1);
     expect(out[0].pid).toBe(1111);
+  });
+});
+
+describe('registryEntry', () => {
+  const ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  it('finds the id whatever its status, newest pid file first', () => {
+    const put = (f: string, o: object) => writeFileSync(join(home, 'sessions', f), JSON.stringify(o));
+    put('1.json', { sessionId: ID, status: 'shell', nameSource: 'derived', updatedAt: 1 });
+    put('2.json', { sessionId: ID, status: 'shell', nameSource: 'user', name: 'pr-412-review', updatedAt: 2 });
+    put('3.json', { sessionId: 'other', nameSource: 'user', updatedAt: 9 });
+    writeFileSync(join(home, 'sessions', 'bad.json'), 'not json');
+    expect(registryEntry(ID)).toMatchObject({ nameSource: 'user', name: 'pr-412-review' });
+    expect(registryEntry('missing')).toBeNull();
+  });
+});
+
+describe('bumpPromptCount', () => {
+  it('counts up per session', () => {
+    const dir = join(home, 'prompts');
+    expect(bumpPromptCount('a', dir)).toBe(1);
+    expect(bumpPromptCount('a', dir)).toBe(2);
+    expect(bumpPromptCount('b', dir)).toBe(1);
   });
 });
 

@@ -106,6 +106,15 @@ export interface LiveSession {
   profile?: string;
 }
 
+/** The naming fields of a Claude Code `sessions/<pid>.json` record (2.1.318+). */
+export interface RegistryEntry {
+  name?: string;
+  /** `derived` until the user runs `/rename`, then `user`. */
+  nameSource?: string;
+  kind?: string;
+  updatedAt?: number;
+}
+
 export type TranscriptRole = 'user' | 'assistant' | 'system' | 'tool';
 export type TranscriptKind =
   | 'text'

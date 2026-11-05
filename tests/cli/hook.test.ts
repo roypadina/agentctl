@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseSessionId, sessionStartContext } from '../../src/cli/hook.js';
-import type { Annotation } from '../../src/core/types.js';
+import { parseSessionId, sessionStartContext, userPromptContext } from '../../src/cli/hook.js';
+import type { Annotation, RegistryEntry } from '../../src/core/types.js';
 
 const ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const payload = JSON.stringify({ session_id: ID, hook_event_name: 'SessionStart', source: 'startup' });
 const ann = (o: Partial<Annotation> = {}): Annotation => ({ sessionId: ID, flags: [], labels: [], done: false, hidden: false, deleted: false, ...o });
-const none = { annotation: () => null, all: () => new Map<string, Annotation>() };
+const none = { annotation: () => null, all: () => new Map<string, Annotation>(), registry: () => null };
 
 describe('parseSessionId', () => {
   it('reads session_id and survives junk', () => {
@@ -56,6 +56,11 @@ describe('sessionStartContext', () => {
     expect(out).toContain('agentctl annotations --due');
   });
 
+  it('leaves naming to the prompt hook when Claude Code tracks /rename', () => {
+    const registry = (): RegistryEntry => ({ kind: 'interactive', nameSource: 'derived', name: 'agentctl-44' });
+    expect(sessionStartContext(payload, { ...none, registry })).not.toContain('has no Agentctl name');
+  });
+
   it('always ends with the tool list so the model knows the commands', () => {
     const last = sessionStartContext(payload, none).trimEnd().split('\n').at(-1)!;
     expect(last).toContain('agentctl name/note/label/flag/remind/due/done');
@@ -89,5 +94,54 @@ describe('sessionStartContext', () => {
     });
     expect(upcoming).toContain('Due 2030-01-01');
     expect(upcoming).not.toContain('past its due date');
+  });
+});
+
+describe('userPromptContext', () => {
+  const prompt = JSON.stringify({ session_id: ID, hook_event_name: 'UserPromptSubmit', prompt: 'hi' });
+  const reg = (o: Partial<RegistryEntry> = {}) => (): RegistryEntry =>
+    ({ kind: 'interactive', nameSource: 'derived', name: 'agentctl-44', ...o });
+  const run = (deps: Parameters<typeof userPromptContext>[1]) => {
+    const renamed: [string, string][] = [];
+    const out = userPromptContext(prompt, { annotation: () => null, setName: (i, n) => { renamed.push([i, n]); }, ...deps });
+    return { out, renamed };
+  };
+
+  it('stays silent on the first prompt of an unnamed session', () => {
+    expect(run({ registry: reg(), bump: () => 1 }).out).toBe('');
+  });
+
+  it('asks for a /rename from the second prompt on', () => {
+    const { out, renamed } = run({ registry: reg(), bump: () => 2 });
+    expect(out).toContain('agentctl name "<name>"');
+    expect(out).toContain('Rename: **/rename <name>**');
+    expect(out.trimEnd().split('\n')).toHaveLength(1);
+    expect(renamed).toEqual([]);
+  });
+
+  it('says nothing and counts nothing once the user has renamed it', () => {
+    let bumped = false;
+    const { out } = run({
+      registry: reg({ nameSource: 'user', name: 'pr-412-review' }),
+      annotation: () => ann({ name: 'pr-412-review' }),
+      bump: () => { bumped = true; return 5; },
+    });
+    expect(out).toBe('');
+    expect(bumped).toBe(false);
+  });
+
+  it('syncs the Agentctl name to the /rename name, only when it differs', () => {
+    const named = reg({ nameSource: 'user', name: 'pr-412-review' });
+    expect(run({ registry: named, annotation: () => ann({ name: 'old words' }) }).renamed).toEqual([[ID, 'pr-412-review']]);
+    expect(run({ registry: named }).renamed).toEqual([[ID, 'pr-412-review']]);
+    expect(run({ registry: named, annotation: () => ann({ name: 'pr-412-review' }) }).renamed).toEqual([]);
+  });
+
+  it('exits silently without a registry entry, for non-interactive sessions, or on junk input', () => {
+    expect(run({ registry: () => null, bump: () => 9 }).out).toBe('');
+    expect(run({ registry: reg({ kind: 'sdk-cli' }), bump: () => 9 }).out).toBe('');
+    expect(run({ registry: reg({ nameSource: undefined }), bump: () => 9 }).out).toBe('');
+    expect(userPromptContext('not json', { registry: reg(), bump: () => 9 })).toBe('');
+    expect(userPromptContext(JSON.stringify({ session_id: '../etc' }), { registry: reg(), bump: () => 9 })).toBe('');
   });
 });

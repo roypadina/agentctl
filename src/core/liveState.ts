@@ -1,8 +1,50 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { sessionsDirs } from './paths.js';
-import type { LiveSession } from './types.js';
+import type { LiveSession, RegistryEntry } from './types.js';
+
+/**
+ * Claude Code's own record of one session, whatever its status — `readLiveSessions` keeps only
+ * busy/idle, but a session running a `!` command reports `shell`. Newest wins when a stale pid
+ * file shares the id.
+ */
+export function registryEntry(id: string): RegistryEntry | null {
+  let best: RegistryEntry | null = null;
+  for (const dir of sessionsDirs()) {
+    let files: string[];
+    try {
+      files = readdirSync(dir);
+    } catch {
+      continue;
+    }
+    for (const f of files) {
+      if (!f.endsWith('.json')) continue;
+      try {
+        const d = JSON.parse(readFileSync(join(dir, f), 'utf8')) as RegistryEntry & { sessionId?: unknown };
+        if (d.sessionId === id && (!best || (d.updatedAt ?? 0) > (best.updatedAt ?? 0))) best = d;
+      } catch {
+        // skip corrupt
+      }
+    }
+  }
+  return best;
+}
+
+/** Prompts submitted in a session so far, this one included. A tmp file per session is enough. */
+export function bumpPromptCount(id: string, dir = join(tmpdir(), 'agentctl-prompts')): number {
+  const file = join(dir, id);
+  let n = 0;
+  try {
+    n = Number(readFileSync(file, 'utf8')) || 0;
+  } catch {
+    // first prompt
+  }
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(file, String(n + 1));
+  return n + 1;
+}
 
 export function readLiveSessions(): LiveSession[] {
   const out: LiveSession[] = [];
