@@ -208,6 +208,9 @@ The [`agentctl-sessions` plugin](https://github.com/roypadina/padina-claude-code
   `/agentctl-remind`, `/agentctl-due`, `/agentctl-done`.
 - **A `SessionStart` hook** that hands each session its own name, labels, note and due state back, so a
   resumed session knows what it is and what is overdue.
+- **A `UserPromptSubmit` hook** (0.14.0+) for the name other sessions can address: until you `/rename`
+  the session, Claude proposes a short name from your second prompt on and ends each reply with
+  `Rename: /rename <name>`. Once you rename it the hook goes silent and the Agentctl name follows.
 - **A skill** that teaches Claude to do it unprompted — name the session once the task is clear, label it
   with the issue key from your branch — and to drive every command when you just ask in plain words
   ("mark this done", "remind me in 2h", "what do I need to get back to?"). If `agentctl` isn't installed
