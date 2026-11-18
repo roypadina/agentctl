@@ -25,7 +25,7 @@ npm run build       # tsup → dist/
 npx tsx src/cli/index.ts        # agentctl (New; -r for Resume)
 ```
 
-Requirements: Node 18+, macOS.
+Requirements: Node 20.19+ for development (the published CLI still runs on Node 18+), macOS.
 
 ## Architecture
 
