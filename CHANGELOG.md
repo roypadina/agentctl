@@ -3,6 +3,13 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.14.1] — 2026-11-18
+
+### Security
+
+- Updated `smol-toml` to 1.9.1 and `ws` (via ink) to 8.23.0, both shipped in the release, to fix known high-severity advisories.
+- Updated dev tooling (`vitest` 4, `vite` 8, `esbuild`) to clear the Dependabot alerts for `vite` ≤ 6.4.1 and `esbuild` ≤ 0.24.2. No change to how agentctl works.
+
 ## [0.14.0] — 2026-11-05
 
 ### Added
