@@ -104,7 +104,7 @@ describe('hidden and deleted sessions', () => {
     const after = statSync(jsonl());
     expect(after.size).toBe(before.size);
     expect(after.mtimeMs).toBe(before.mtimeMs);
-  });
+  }, 30_000); // 11 CLI spawns via npx tsx; the 5 s default is too tight on CI runners
 
   it('still resolves a deleted session by id, so it can be recovered', () => {
     runCli(['delete', '-s', ID]);
