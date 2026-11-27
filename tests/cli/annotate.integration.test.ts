@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,5 +58,29 @@ describe('annotation commands', () => {
     const r = runCli(['flag', 'orphan']);
     expect(r.status).toBe(2);
     expect(r.stderr).toContain('pass -s');
+  });
+
+  // An annotation whose transcript is gone (real shape, from ~/.config/agentctl/annotations).
+  it('handles an orphan annotation: listed as gone, done/remind by prefix, path explains', () => {
+    const orphan = '0fade0ff-0000-4000-8000-000000000001';
+    const dir = join(xdg, 'agentctl', 'annotations');
+    mkdirSync(dir, { recursive: true });
+    copyFileSync(join(here, '..', 'fixtures', 'orphan', `${orphan}.json`), join(dir, `${orphan}.json`));
+
+    const due = runCli(['annotations', '--due']);
+    expect(due.stdout).toContain('0fade0ff');
+    expect(due.stdout).toContain('(transcript gone)');
+    const json = JSON.parse(runCli(['annotations', '--json']).stdout);
+    expect(json.find((a: { sessionId: string }) => a.sessionId === orphan).transcriptGone).toBe(true);
+
+    expect(runCli(['remind', '--clear', '-s', '0fade0ff']).status).toBe(0);
+    const done = runCli(['done', '0fad']);
+    expect(done.status).toBe(0);
+    expect(done.stdout).toContain('done');
+    expect(runCli(['annotations', '--due']).stdout).toContain('nothing due');
+
+    const path = runCli(['path', '0fade0ff']);
+    expect(path.status).toBe(1);
+    expect(path.stderr).toContain('transcript gone; annotation only');
   });
 });

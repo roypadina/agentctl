@@ -4,6 +4,7 @@ import {
 } from '../core/annotations.js';
 import { readGitBranch } from '../core/git.js';
 import { bumpPromptCount, registryEntry } from '../core/liveState.js';
+import { transcriptIds } from '../core/sessionRepo.js';
 import type { Annotation, RegistryEntry } from '../core/types.js';
 
 // Entry points for the agentctl-sessions Claude Code plugin. A hook must NEVER break the session it
@@ -12,6 +13,7 @@ import type { Annotation, RegistryEntry } from '../core/types.js';
 export interface HookDeps {
   annotation?: (id: string) => Annotation | null;
   all?: () => Map<string, Annotation>;
+  transcripts?: () => Set<string>;
   now?: Date;
   branch?: (cwd: string | undefined) => string | null;
   registry?: (id: string) => RegistryEntry | null;
@@ -88,9 +90,12 @@ export function sessionStartContext(raw: string, deps: HookDeps = {}): string {
       `${dueElsewhere.length} other session(s) have a reminder due. Mention each once, with its session and` +
       ' resume command:',
     );
+    const onDisk = (deps.transcripts ?? transcriptIds)();
     for (const x of dueElsewhere.slice(0, 3)) {
       const short = x.sessionId.slice(0, 8);
-      lines.push(`- "${x.name ?? short}" (session ${short}) — resume: \`agentctl resume ${short}\``);
+      lines.push(onDisk.has(x.sessionId)
+        ? `- "${x.name ?? short}" (session ${short}) — resume: \`agentctl resume ${short}\``
+        : `- "${x.name ?? short}" (session ${short}) — transcript gone, annotation only; silence it: \`agentctl done ${short}\``);
     }
     lines.push(
       'This list is a snapshot from when this session started; reminders get cleared from other sessions.' +

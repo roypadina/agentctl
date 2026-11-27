@@ -22,7 +22,12 @@ export async function resolveId(prefix: string) {
   }
   const matches = await getSession(prefix);
   if (matches.length === 0) {
-    console.error('not found');
+    // An annotation can outlive its transcript: say so instead of a bare "not found".
+    const { readAllAnnotations } = await import('../core/annotations.js');
+    const orphan = [...readAllAnnotations().keys()].find(k => k.startsWith(prefix));
+    console.error(orphan
+      ? `${orphan.slice(0, 8)}: transcript gone; annotation only (\`agentctl done ${orphan.slice(0, 8)}\` silences it)`
+      : 'not found');
     process.exit(1);
   }
   if (matches.length > 1) {

@@ -198,7 +198,9 @@ Run inside a Claude session, they target **that** session — no id needed. From
 Labels and flags are both matched by the picker's filter, so `RD-12345` finds every session on that ticket.
 
 It's stored in `~/.config/agentctl/annotations/<session-id>.json`, one small file per session,
-deliberately outside `~/.claude` — nothing here can corrupt a transcript.
+deliberately outside `~/.claude` — nothing here can corrupt a transcript. An annotation can outlive its
+transcript (Claude Code deleted it): `annotations` marks it `(transcript gone)`, and `done` / `remind --clear`
+still accept its id or prefix, so its reminder can be silenced.
 
 ### From inside Claude Code
 

@@ -5,7 +5,7 @@ import {
 } from '../core/annotations.js';
 import { readGitBranch } from '../core/git.js';
 import { currentSessionId } from '../core/liveState.js';
-import { listSessions } from '../core/sessionRepo.js';
+import { listSessions, transcriptIds } from '../core/sessionRepo.js';
 import type { Annotation } from '../core/types.js';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -15,15 +15,34 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * A full uuid skips the (slow) session scan so hook scripts stay fast.
  */
 async function targetId(opt?: string): Promise<string> {
-  if (opt) {
-    if (UUID_RE.test(opt)) return opt;
-    const { resolveId } = await import('./index.js');
-    return (await resolveId(opt)).id;
-  }
+  if (opt) return resolveIds([opt])[0];
   const current = currentSessionId();
   if (current) return current;
   console.error('not running inside a Claude session — pass -s <session-id>');
   process.exit(2);
+}
+
+/**
+ * Full session ids for ids/prefixes. Candidates are the transcripts on disk PLUS the annotations:
+ * an annotation can outlive its transcript (orphan), and must still be markable done/un-reminded.
+ * Full uuids pass straight through, so hook scripts stay fast.
+ */
+function resolveIds(ids: string[]): string[] {
+  if (ids.every(id => UUID_RE.test(id))) return ids;
+  const annotations = readAllAnnotations();
+  const known = [...new Set([...transcriptIds(), ...annotations.keys()])];
+  return ids.map(id => {
+    if (UUID_RE.test(id)) return id;
+    if (id.length < 4) { console.error(`id prefix must be at least 4 characters: ${id}`); process.exit(2); }
+    const matches = known.filter(k => k.startsWith(id));
+    if (matches.length === 0) { console.error(`not found: ${id}`); process.exit(1); }
+    if (matches.length > 1) {
+      console.error(`ambiguous prefix '${id}', matches:`);
+      for (const m of matches) console.error(`  ${m}  ${annotations.get(m)?.name ?? ''}`);
+      process.exit(2);
+    }
+    return matches[0];
+  });
 }
 
 function describe(a: Annotation): string {
@@ -55,23 +74,7 @@ async function applyMany(
 ) {
   if (ids.length === 0) { await apply(sessionOpt, patch, json); return; }
 
-  // Resolve every prefix against ONE scan. Resolving them concurrently ran a full session scan
-  // per id, which opened enough files at once to make some of them come back empty.
-  const needScan = ids.some(id => !UUID_RE.test(id));
-  const all = needScan ? await listSessions({ view: 'all' }) : [];
-  const resolved: string[] = [];
-  for (const id of ids) {
-    if (UUID_RE.test(id)) { resolved.push(id); continue; }
-    if (id.length < 4) { console.error(`id prefix must be at least 4 characters: ${id}`); process.exit(2); }
-    const matches = all.filter(s => s.id.startsWith(id));
-    if (matches.length === 0) { console.error(`not found: ${id}`); process.exit(1); }
-    if (matches.length > 1) {
-      console.error(`ambiguous prefix '${id}', matches:`);
-      for (const m of matches) console.error(`  ${m.id}  ${m.name}`);
-      process.exit(2);
-    }
-    resolved.push(matches[0].id);
-  }
+  const resolved = resolveIds(ids);
   const out = resolved.map(id => writeAnnotation(id, patch));
   if (json) { console.log(JSON.stringify(out)); return; }
   for (const a of out) console.log(`${a.sessionId.slice(0, 8)}  ${describe(a)}`);
@@ -244,7 +247,12 @@ look at the session. Shown as ✱, red once the date has passed, and listed by
         .filter(a => !opts.due || isReminderDue(a) || isOverdue(a))
         .filter(a => !opts.label || a.labels.some(l => l.toLowerCase() === opts.label!.toLowerCase()))
         .sort((x, y) => (y.updatedAt ?? '').localeCompare(x.updatedAt ?? ''));
-      if (opts.json) { console.log(JSON.stringify(all, null, 2)); return; }
+      const onDisk = transcriptIds();
+      const gone = (a: Annotation) => !onDisk.has(a.sessionId);
+      if (opts.json) {
+        console.log(JSON.stringify(all.map(a => (gone(a) ? { ...a, transcriptGone: true } : a)), null, 2));
+        return;
+      }
       if (all.length === 0) { console.log(opts.due ? 'nothing due' : 'no annotations yet'); return; }
       // Names come from the annotation itself; fall back to the transcript title only when needed.
       const missing = all.filter(a => !a.name);
@@ -261,6 +269,7 @@ look at the session. Shown as ✱, red once the date has passed, and listed by
           isOverdue(a) ? 'OVERDUE' : '',
           ...a.labels.map(l => `[${l}]`),
           ...a.flags.map(f => `#${f}`),
+          gone(a) ? '(transcript gone)' : '',
         ].filter(Boolean).join(' ');
         console.log(`${a.sessionId.slice(0, 8)}  ${label}${marks ? '  ' + marks : ''}`);
         if (a.note) for (const line of a.note.split('\n')) console.log(`          ${line}`);
