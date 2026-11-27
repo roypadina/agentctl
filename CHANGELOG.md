@@ -3,6 +3,16 @@
 All notable changes to Agentctl are documented here. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com); versions follow [SemVer](https://semver.org).
 
+## [0.14.2] — 2026-11-27
+
+### Fixed
+
+- An annotation whose session transcript is gone (an "orphan") can be managed again: `done`, `remind`, `due`, `name`, `note`, `flag`, `label`, `hide` and `delete` accept its short id or prefix (a full id already worked) instead of printing `not found`, so a reminder that kept coming due can finally be silenced.
+- `annotations` and `annotations --due` mark orphans `(transcript gone)`; `--json` adds `"transcriptGone": true`.
+- `resume`, `path`, `peek` and `recap` on an orphan say `transcript gone; annotation only` and how to silence it, instead of a bare `not found`.
+- The session-start hook offers `agentctl done <id>` instead of a `resume` command that cannot work for a due reminder on an orphan.
+- Prefix ids for the annotation commands resolve from a directory listing instead of scanning every transcript, so they answer faster.
+
 ## [0.14.1] — 2026-11-18
 
 ### Security

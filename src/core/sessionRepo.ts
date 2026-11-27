@@ -61,6 +61,25 @@ export async function listSessions(opts: ListOptions = {}): Promise<SessionRecor
   return opts.limit ? out.slice(0, opts.limit) : out;
 }
 
+/**
+ * Ids of every transcript on disk — readdir only, no scan, so it is cheap enough for the hooks.
+ * An annotation whose id is missing here is an orphan: its transcript is gone.
+ */
+export function transcriptIds(): Set<string> {
+  const ids = new Set<string>();
+  for (const root of projectsDirs()) {
+    let dirs: string[];
+    try { dirs = readdirSync(root); } catch { continue; }
+    for (const dir of dirs) {
+      if (!dir.startsWith('-')) continue;
+      let files: string[];
+      try { files = readdirSync(join(root, dir)); } catch { continue; }
+      for (const f of files) if (f.endsWith('.jsonl')) ids.add(f.slice(0, -'.jsonl'.length));
+    }
+  }
+  return ids;
+}
+
 export type SortColumn = 'used' | 'name' | 'status' | 'branch' | 'work' | 'cwd';
 /** Order `o` cycles through in the TUI; the first is the default. */
 export const SORT_COLUMNS: SortColumn[] = ['used', 'name', 'status', 'branch', 'work', 'cwd'];

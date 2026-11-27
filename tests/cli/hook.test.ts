@@ -48,12 +48,26 @@ describe('sessionStartContext', () => {
     const out = sessionStartContext(payload, {
       annotation: () => null,
       all: () => new Map([['bbbb', other]]),
+      transcripts: () => new Set(['bbbb']),
       now: new Date('2026-08-29T12:00:00Z'),
     });
     expect(out).toContain('1 other session(s)');
     expect(out).toContain('the other one');
     expect(out).toContain('`agentctl resume bbbb`');
     expect(out).toContain('agentctl annotations --due');
+  });
+
+  it('offers `done`, not `resume`, for a due reminder whose transcript is gone', () => {
+    const other = ann({ sessionId: 'bbbb', name: 'orphan', remindAt: '2020-01-01T00:00:00Z' });
+    const out = sessionStartContext(payload, {
+      annotation: () => null,
+      all: () => new Map([['bbbb', other]]),
+      transcripts: () => new Set(),
+      now: new Date('2026-08-29T12:00:00Z'),
+    });
+    expect(out).toContain('transcript gone');
+    expect(out).toContain('`agentctl done bbbb`');
+    expect(out).not.toContain('`agentctl resume bbbb`');
   });
 
   it('leaves naming to the prompt hook when Claude Code tracks /rename', () => {
